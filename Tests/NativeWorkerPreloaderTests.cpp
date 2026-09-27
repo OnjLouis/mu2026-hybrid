@@ -19,7 +19,10 @@ int wmain(int argc, wchar_t** argv)
             true, true);
         preloader.start();
         preloader.start();
-        Sleep(250);
+        const auto deadline = GetTickCount64() + 5'000;
+        while (!preloader.preloadComplete() && GetTickCount64() < deadline)
+            Sleep(10);
+        assert(preloader.preloadComplete());
         for (std::uint8_t voice = 0;
              voice < hybrid::NativeWorkerPreloader::vlVoiceCount; ++voice) {
             const auto result = preloader.takeVl(voice);

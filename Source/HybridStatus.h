@@ -8,9 +8,10 @@
 namespace hybrid {
 
 enum class DisplayEngine : std::uint8_t {
-    xg,
+    mu,
     vl,
     sg,
+    le,
 };
 
 enum class WorkerDisplayState : std::uint8_t {
@@ -29,7 +30,7 @@ enum class ResetDisplayState : std::uint8_t {
 };
 
 struct ChannelStatusSnapshot {
-    DisplayEngine engine {DisplayEngine::xg};
+    DisplayEngine engine {DisplayEngine::mu};
     std::uint8_t bankMsb {};
     std::uint8_t bankLsb {};
     std::uint8_t program {};
@@ -70,7 +71,7 @@ public:
     HybridStatus() noexcept;
 
     void observeShortMessage(std::uint32_t packedMessage, bool vlChannel,
-                             bool sgChannel) noexcept;
+                             bool sgChannel, bool leChannel = false) noexcept;
     void reset(ResetDisplayState resetState) noexcept;
 
     void setAvailability(bool vlAvailable, bool sgAvailable) noexcept;
@@ -94,6 +95,7 @@ private:
     struct ChannelState {
         ChannelStatusSnapshot value {};
         std::array<std::uint16_t, 128> heldNotes {};
+        bool leChannel {};
     };
 
     struct PublishedChannel {
@@ -103,7 +105,7 @@ private:
     };
 
     static DisplayEngine routeEngine(std::uint8_t bankMsb, bool vlChannel,
-                                     bool sgChannel) noexcept;
+                                     bool sgChannel, bool leChannel) noexcept;
     static HybridStatus& sharedStatus() noexcept;
     void applySnapshot(const HybridStatusSnapshot& snapshot) noexcept;
     void publishChannel(std::size_t channel) noexcept;

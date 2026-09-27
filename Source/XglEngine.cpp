@@ -1,4 +1,5 @@
 #include "XglEngine.h"
+#include "MuVoiceCatalog.h"
 #include "GsPartPitch.h"
 #include "MuVoiceMapSelector.h"
 #include "XgPartModes.h"
@@ -170,9 +171,21 @@ public:
         }
     }
 
+    void setMuVoiceCatalog(const MuVoiceCatalog* catalog) noexcept
+    {
+        muCatalog = catalog;
+    }
+
+    bool selectedVoice(std::uint8_t channel) const noexcept
+    {
+        return channel < parts.size()
+            && hasSelectedVoice(channel, parts[channel]);
+    }
+
     void reset(MidiSystemReset system = MidiSystemReset::xg)
     {
         variationRouting.reset();
+        insertionEffectEnabled = false;
         partModes.reset(system);
         for (std::size_t partIndex = 0; partIndex < parts.size(); ++partIndex) {
             auto& part = parts[partIndex];
@@ -209,6 +222,13 @@ public:
                       std::int32_t deltaFrames)
     {
         (void)muVoiceMap.observe(sysex);
+        if (sysex.size() == 10 && sysex[0] == 0xf0
+            && sysex[1] == 0x43 && (sysex[2] & 0xf0) == 0x10
+            && sysex[3] == 0x4c && sysex[4] == 0x02
+            && sysex[5] == 0x01 && sysex[6] == 0x40
+            && sysex[9] == 0xf7) {
+            insertionEffectEnabled = sysex[7] != 0 || sysex[8] != 0;
+        }
         const auto previousPart = activeInsertionPart();
         variationRouting.observe(sysex);
         if (const auto keyShift = gsPartKeyShift(sysex)) {
@@ -484,7 +504,9 @@ private:
             partIndex, part.bankMsb);
         const auto bankLsb = partModes.effectiveBankLsb(
             partIndex, part.bankLsb);
-        return muVoiceMap.allows2006Voice(bankMsb, bankLsb)
+        return muCatalog != nullptr && muCatalog->valid()
+            && !muCatalog->hasDistinctVoice(bankMsb, bankLsb, part.program)
+            && muVoiceMap.allows2006Voice(bankMsb, bankLsb)
             && voiceMap.shouldUse2006Engine(bankMsb, bankLsb, part.program);
     }
 
@@ -530,9 +552,9 @@ private:
         for (std::int32_t frame = 0; frame < frames; ++frame) {
             const auto l = left[frame];
             const auto r = right[frame];
-            if (insertion) {
-                buses[6 * stride + frame] += l * insertionPrePanGain;
-                buses[7 * stride + frame] += r * insertionPrePanGain;
+            if (insertion && insertionEffectEnabled) {
+                buses[8 * stride + frame] += l * insertionPrePanGain;
+                buses[9 * stride + frame] += r * insertionPrePanGain;
                 continue;
             }
             buses[0 * stride + frame] += l;
@@ -551,8 +573,10 @@ private:
     std::array<PartState, XglEngine::partCount> parts;
     XgPartModes partModes;
     MuVoiceMapSelector muVoiceMap;
+    const MuVoiceCatalog* muCatalog {};
     XglVoiceMap voiceMap;
     XgVariationRouting variationRouting;
+    bool insertionEffectEnabled {};
     std::vector<float> left;
     std::vector<float> right;
     float sampleRate {};
@@ -578,6 +602,16 @@ void XglEngine::setSampleRate(float sampleRate)
 void XglEngine::setBlockSize(std::int32_t blockSize)
 {
     impl->setBlockSize(blockSize);
+}
+
+void XglEngine::setMuVoiceCatalog(const MuVoiceCatalog* catalog) noexcept
+{
+    impl->setMuVoiceCatalog(catalog);
+}
+
+bool XglEngine::selectedVoice(std::uint8_t channel) const noexcept
+{
+    return impl->selectedVoice(channel);
 }
 
 void XglEngine::reset(MidiSystemReset system)

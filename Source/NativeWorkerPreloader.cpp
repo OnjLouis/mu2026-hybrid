@@ -2,6 +2,7 @@
 
 #include <windows.h>
 
+#include <algorithm>
 #include <exception>
 #include <utility>
 
@@ -71,6 +72,16 @@ void NativeWorkerPreloader::stop()
     for (auto& client : vlClients)
         client.reset();
     sgClient.reset();
+}
+
+bool NativeWorkerPreloader::preloadComplete() const
+{
+    std::lock_guard lock(mutex);
+    const auto done = [](State state) {
+        return state != State::queued && state != State::loading;
+    };
+    return done(sgState)
+        && std::all_of(vlStates.begin(), vlStates.end(), done);
 }
 
 PreloadedWorker<NativeVlClient> NativeWorkerPreloader::takeVl(

@@ -3,6 +3,8 @@
 #include "HybridStatus.h"
 #include "MidiRouter.h"
 #include "MidiSystemReset.h"
+#include "MuVoiceCatalog.h"
+#include "MuInsertionRouting.h"
 #include "MidiChannelSnapshot.h"
 #include "NativeEventTimeline.h"
 #include "NativeSgClient.h"
@@ -15,8 +17,8 @@
 #include "VlPluginVoiceBulk.h"
 #include "VlVoiceAllocator.h"
 #include "Vst2Abi.h"
-#include "XgEffectsBridge.h"
 #include "XgPartModes.h"
+#include "XgVariationRouting.h"
 #include "XglEngine.h"
 
 #include <windows.h>
@@ -29,6 +31,7 @@
 #include <cstring>
 #include <cwchar>
 #include <filesystem>
+#include <fstream>
 #include <memory>
 #include <new>
 #include <span>
@@ -52,25 +55,25 @@ constexpr std::size_t maxSyntheticPartModeEvents = childEventsPerBatch;
 constexpr std::size_t maxSyntheticGsEffectEvents = childEventsPerBatch;
 constexpr float int16Scale = 1.0f / 32768.0f;
 constexpr float defaultNativeOutputGain = 3.5f;
-constexpr float xgInternalBusScale = 32768.0f;
 constexpr std::uint32_t nativeSampleRate = 44'100;
 constexpr std::size_t vlOutputBusCount = hybrid::ipc::planeCount * 2;
-constexpr std::size_t xgCachedFramesOffset = 0x100;
-constexpr std::int32_t hybridUniqueId = 0x53324859; // "S2HY"
+constexpr std::size_t muInputBusCount = 10;
+constexpr std::size_t renderQuantumFrames = 512;
+constexpr std::int32_t hybridUniqueId = 0x4d323648; // "M26H"
 constexpr std::int32_t hybridVendorVersion = 100;
-constexpr char hybridEffectName[] = "S-YXG2026 Hybrid";
+constexpr char hybridEffectName[] = "Mu2026 Hybrid";
 constexpr char hybridVendorName[] = "Onj Research";
 constexpr hybrid::HybridEditorConfig editorConfig {
-    L"SYXG2026HybridAccessibleEditor",
-    L"S-YXG2026 Hybrid",
-    L"2006LE/XG50",
+    L"Mu2026HybridAccessibleEditor",
+    L"Mu2026 Hybrid",
+    L"MU2000",
     L"2006LE",
     L"1. SG claims note events for channels in its native route mask.\r\n"
     L"2. Bank MSB 33, 81, or 97 selects VL/PVL.\r\n"
-    L"3. Voices present in the S-YXG2006LE map use the 2006LE engine.\r\n"
-    L"4. Unsupported voices and fallback MIDI continue to S-YXG50.\r\n"
+    L"3. MU2000 supplies the main voice set.\r\n"
+    L"4. MU2000 gaps may use S-YXG2006LE voices.\r\n"
     L"5. 2006LE, VL, and SG dry, reverb, chorus, and variation buses enter "
-    L"S-YXG50 before Yamaha effects processing."
+    L"MU2000 before Yamaha effects processing."
 };
 
 vst2::IntPtr writeVstString(void* destination, const char* text,
@@ -174,6 +177,8 @@ struct WrapperState {
     SgState sg;
     hybrid::MidiRouter router;
     hybrid::GsEffectTranslator gsEffectTranslator;
+    hybrid::XgVariationRouting variationRouting;
+    bool insertionEffectEnabled {};
     hybrid::XgPartModes childPartModes;
     hybrid::HybridStatus status;
     std::unique_ptr<hybrid::HybridEditor> editor;
@@ -209,19 +214,17 @@ struct WrapperState {
     std::vector<float> nativeOutputBuses;
     std::size_t nativeOutputCapacityFrames {};
     std::unique_ptr<hybrid::XglEngine> xgl;
+    std::unique_ptr<hybrid::MuVoiceCatalog> muVoiceCatalog;
     std::vector<float> xglOutputBuses;
+    std::vector<float> muInputBuses;
     hybrid::StreamingRateAdapter nativeRateAdapter;
-    std::size_t vlEffectsCursor {};
     float sampleRate {};
     float nativeOutputGain {defaultNativeOutputGain};
     bool vlAvailable {};
     bool sgAvailable {};
     bool vlSetupHistoryFrozen {};
     bool sgSetupHistoryFrozen {};
-    bool xgEffectsBridgeAvailable {};
     bool vlRenderDiagnosticWritten {};
-    bool vlHookDiagnosticWritten {};
-    bool xgBusDiagnosticWritten {};
 };
 
 std::uint64_t nativeFrame(const WrapperState& wrapper,
@@ -235,8 +238,7 @@ std::uint64_t nativeFrame(const WrapperState& wrapper,
 void configureAudioBuffers(WrapperState& wrapper,
                            std::size_t requestedFrames)
 {
-    const auto quantum = static_cast<std::size_t>(
-        hybrid::XgEffectsBridge::quantumFrames);
+    const auto quantum = renderQuantumFrames;
     wrapper.vlOutputCapacityFrames = (requestedFrames + quantum - 1)
         / quantum * quantum;
     wrapper.vlOutputBuses.assign(
@@ -254,6 +256,8 @@ void configureAudioBuffers(WrapperState& wrapper,
         wrapper.nativeOutputCapacityFrames * vlOutputBusCount, 0.0f);
     wrapper.xglOutputBuses.assign(
         wrapper.vlOutputCapacityFrames * hybrid::XglEngine::busCount, 0.0f);
+    wrapper.muInputBuses.assign(
+        wrapper.vlOutputCapacityFrames * muInputBusCount, 0.0f);
 }
 
 WrapperState* state(vst2::AEffect* effect)
@@ -265,7 +269,7 @@ float readNativeOutputGain() noexcept
 {
     wchar_t text[32] {};
     const auto length = GetEnvironmentVariableW(
-        L"SYXG2026_NATIVE_GAIN", text, static_cast<DWORD>(std::size(text)));
+        L"MU2026_NATIVE_GAIN", text, static_cast<DWORD>(std::size(text)));
     if (length == 0 || length >= std::size(text))
         return defaultNativeOutputGain;
     wchar_t* end {};
@@ -290,7 +294,7 @@ void reportVlFailure(const char* context, const char* details = nullptr)
 
     wchar_t logPath[MAX_PATH] {};
     const auto length = GetEnvironmentVariableW(
-        L"SYXG2026_HYBRID_LOG", logPath, MAX_PATH);
+        L"MU2026_HYBRID_LOG", logPath, MAX_PATH);
     if (length == 0 || length >= MAX_PATH)
         return;
     const auto file = CreateFileW(logPath, FILE_APPEND_DATA, FILE_SHARE_READ,
@@ -317,7 +321,7 @@ void reportSgFailure(const char* context, const char* details = nullptr)
 
     wchar_t logPath[MAX_PATH] {};
     const auto length = GetEnvironmentVariableW(
-        L"SYXG2026_HYBRID_LOG", logPath, MAX_PATH);
+        L"MU2026_HYBRID_LOG", logPath, MAX_PATH);
     if (length == 0 || length >= MAX_PATH)
         return;
     const auto file = CreateFileW(logPath, FILE_APPEND_DATA, FILE_SHARE_READ,
@@ -343,7 +347,7 @@ void reportSgDiagnostic(const char* stage, bool available,
         return;
     wchar_t logPath[MAX_PATH] {};
     const auto pathLength = GetEnvironmentVariableW(
-        L"SYXG2026_HYBRID_LOG", logPath, MAX_PATH);
+        L"MU2026_HYBRID_LOG", logPath, MAX_PATH);
     if (pathLength == 0 || pathLength >= MAX_PATH)
         return;
     const auto file = CreateFileW(logPath, FILE_APPEND_DATA, FILE_SHARE_READ,
@@ -368,7 +372,7 @@ void reportBridgeDiagnostic(const char* stage, std::int32_t frames,
         return;
     wchar_t logPath[MAX_PATH] {};
     const auto pathLength = GetEnvironmentVariableW(
-        L"SYXG2026_HYBRID_LOG", logPath, MAX_PATH);
+        L"MU2026_HYBRID_LOG", logPath, MAX_PATH);
     if (pathLength == 0 || pathLength >= MAX_PATH)
         return;
     const auto file = CreateFileW(logPath, FILE_APPEND_DATA, FILE_SHARE_READ,
@@ -402,7 +406,7 @@ void reportBusDiagnostic(const WrapperState& wrapper, std::int32_t frames)
         return;
     wchar_t logPath[MAX_PATH] {};
     const auto pathLength = GetEnvironmentVariableW(
-        L"SYXG2026_HYBRID_LOG", logPath, MAX_PATH);
+        L"MU2026_HYBRID_LOG", logPath, MAX_PATH);
     if (pathLength == 0 || pathLength >= MAX_PATH)
         return;
     const auto file = CreateFileW(logPath, FILE_APPEND_DATA, FILE_SHARE_READ,
@@ -412,44 +416,6 @@ void reportBusDiagnostic(const WrapperState& wrapper, std::int32_t frames)
         return;
     DWORD written {};
     WriteFile(file, message, static_cast<DWORD>(length), &written, nullptr);
-    CloseHandle(file);
-}
-
-void reportXgBusDiagnostic(const float* buses, std::uint32_t frames)
-{
-    std::array<float, hybrid::XgEffectsBridge::busCount> peaks {};
-    for (std::size_t bus = 0; bus < peaks.size(); ++bus) {
-        const auto* samples = buses
-            + bus * hybrid::XgEffectsBridge::busStrideFrames;
-        for (std::uint32_t frame = 0; frame < frames; ++frame)
-            peaks[bus] = std::max(peaks[bus], std::abs(samples[frame]));
-    }
-    wchar_t logPath[MAX_PATH] {};
-    const auto pathLength = GetEnvironmentVariableW(
-        L"SYXG2026_HYBRID_LOG", logPath, MAX_PATH);
-    if (pathLength == 0 || pathLength >= MAX_PATH)
-        return;
-    const auto file = CreateFileW(logPath, FILE_APPEND_DATA, FILE_SHARE_READ,
-                                  nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL,
-                                  nullptr);
-    if (file == INVALID_HANDLE_VALUE)
-        return;
-    char message[512] {};
-    auto position = std::snprintf(message, sizeof(message),
-                                  "S-YXG2026 Hybrid XG buses:");
-    for (std::size_t bus = 0; bus < peaks.size()
-         && position > 0
-         && static_cast<std::size_t>(position) < sizeof(message); ++bus) {
-        position += std::snprintf(
-            message + position, sizeof(message) - position,
-            " %zu=%.8g", bus, static_cast<double>(peaks[bus]));
-    }
-    if (position > 0 && static_cast<std::size_t>(position) < sizeof(message)) {
-        message[position++] = '\n';
-        DWORD written {};
-        WriteFile(file, message, static_cast<DWORD>(position), &written,
-                  nullptr);
-    }
     CloseHandle(file);
 }
 
@@ -1292,7 +1258,9 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                 const bool sgChannel = (wrapper.sg.routeMask
                     & (std::uint32_t {1} << channel)) != 0;
                 wrapper.status.observeShortMessage(
-                    packed, wrapper.router.isVlChannel(channel), sgChannel);
+                    packed, wrapper.router.isVlChannel(channel), sgChannel,
+                    wrapper.xgl != nullptr
+                        && wrapper.xgl->selectedVoice(channel));
             } else if (event != nullptr && event->type == 6) {
                 const auto* sysex = reinterpret_cast<const vst2::SysexEvent*>(event);
                 if (sysex->sysexDump != nullptr && sysex->dumpBytes > 0) {
@@ -1319,6 +1287,8 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                         wrapper.router.reset();
                         wrapper.childPartModes.reset(systemReset);
                         wrapper.gsEffectTranslator.reset();
+                        wrapper.variationRouting.reset();
+                        wrapper.insertionEffectEnabled = false;
                         resetVlPlaybackState(wrapper);
                         wrapper.status.reset(displayReset(systemReset));
                         clearVlSetup(wrapper);
@@ -1328,6 +1298,25 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                             wrapper.xgl->reset(systemReset);
                     }
                     (void)wrapper.childPartModes.observe(bytes);
+                    wrapper.variationRouting.observe(bytes);
+                    if (bytes.size() == 10 && bytes[0] == 0xf0
+                        && bytes[1] == 0x43 && (bytes[2] & 0xf0) == 0x10
+                        && bytes[3] == 0x4c && bytes[4] == 0x02
+                        && bytes[5] == 0x01 && bytes[6] == 0x40
+                        && bytes[9] == 0xf7) {
+                        wrapper.insertionEffectEnabled = bytes[7] != 0
+                            || bytes[8] != 0;
+                    }
+                    if (const auto insertion =
+                            hybrid::muInsertionForVariation(bytes)) {
+                        if (retainGsEffectSysex(
+                                wrapper,
+                                std::span(insertion->bytes.data(),
+                                          insertion->size),
+                                sysex->deltaFrames, firstChildEvent)) {
+                            firstChildEvent = false;
+                        }
+                    }
                     if (wrapper.xgl != nullptr)
                         wrapper.xgl->observeSysex(bytes,
                                                  sysex->deltaFrames);
@@ -1338,6 +1327,9 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                         // unrelated native effect after the XG replacement.
                         sendToChild = false;
                         if (gsEffect->type) {
+                            wrapper.insertionEffectEnabled =
+                                gsEffect->type->msb != 0
+                                || gsEffect->type->lsb != 0;
                             constexpr std::array<std::uint8_t, 9>
                                 systemVariation {
                                     0xf0, 0x43, 0x10, 0x4c, 0x02,
@@ -1354,6 +1346,16 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                                 if (wrapper.xgl != nullptr)
                                     wrapper.xgl->observeSysex(
                                         effectType, sysex->deltaFrames);
+                            }
+                            if (const auto insertion =
+                                    hybrid::muInsertionForVariation(effectType)) {
+                                if (retainGsEffectSysex(
+                                        wrapper,
+                                        std::span(insertion->bytes.data(),
+                                                  insertion->size),
+                                        sysex->deltaFrames, firstChildEvent)) {
+                                    firstChildEvent = false;
+                                }
                             }
                             if (retainGsEffectSysex(
                                     wrapper, systemVariation,
@@ -1803,129 +1805,36 @@ bool renderVl(WrapperState& wrapper, std::int32_t frames,
     return true;
 }
 
-bool xgRenderWindow(const WrapperState& wrapper, std::int32_t frames,
-                    std::int32_t& cachedPrefix,
-                    std::int32_t& generatedFrames) noexcept
+std::array<float*, muInputBusCount> prepareMuInputBuses(
+    WrapperState& wrapper, std::int32_t frames,
+    bool renderedVl, bool renderedXgl)
 {
-    if (wrapper.child == nullptr || wrapper.child->object == nullptr
-        || frames < 0) {
-        return false;
-    }
-    const auto* object = static_cast<const std::byte*>(wrapper.child->object);
-    cachedPrefix = *reinterpret_cast<const std::int32_t*>(
-        object + xgCachedFramesOffset);
-    if (cachedPrefix < 0
-        || cachedPrefix > static_cast<std::int32_t>(
-            hybrid::XgEffectsBridge::quantumFrames)) {
-        return false;
-    }
-    const auto needed = std::max(0, frames - cachedPrefix);
-    const auto quantum = static_cast<std::int32_t>(
-        hybrid::XgEffectsBridge::quantumFrames);
-    generatedFrames = ((needed + quantum - 1) / quantum) * quantum;
-    return static_cast<std::size_t>(generatedFrames)
-        <= wrapper.vlOutputCapacityFrames;
-}
-
-void mixVlDry(WrapperState& wrapper, float** outputs, std::int32_t frames)
-{
-    if (outputs == nullptr || outputs[0] == nullptr || outputs[1] == nullptr)
-        return;
-    const auto* left = vlBus(wrapper, dryLeft);
-    const auto* right = vlBus(wrapper, dryRight);
-    for (std::int32_t frame = 0; frame < frames; ++frame) {
-        outputs[0][frame] += left[frame] * wrapper.nativeOutputGain;
-        outputs[1][frame] += right[frame] * wrapper.nativeOutputGain;
-    }
-}
-
-void mixXglDry(WrapperState& wrapper, float** outputs, std::int32_t frames)
-{
-    if (outputs == nullptr || outputs[0] == nullptr || outputs[1] == nullptr
-        || wrapper.xglOutputBuses.empty()) {
-        return;
-    }
-    const auto* left = xglBus(wrapper, dryLeft);
-    const auto* right = xglBus(wrapper, dryRight);
-    for (std::int32_t frame = 0; frame < frames; ++frame) {
-        outputs[0][frame] += left[frame];
-        outputs[1][frame] += right[frame];
-    }
-}
-
-void injectVlBuses(void* context, float* buses,
-                   std::uint32_t frames) noexcept
-{
-    auto& wrapper = *static_cast<WrapperState*>(context);
-    if (!wrapper.xgBusDiagnosticWritten) {
-        float xgPeak = 0.0f;
-        for (std::size_t bus = 0;
-             bus < hybrid::XgEffectsBridge::busCount; ++bus) {
-            const auto* samples = buses
-                + bus * hybrid::XgEffectsBridge::busStrideFrames;
-            for (std::uint32_t frame = 0; frame < frames; ++frame)
-                xgPeak = std::max(xgPeak, std::abs(samples[frame]));
-        }
-        if (xgPeak > 0.0f) {
-            reportXgBusDiagnostic(buses, frames);
-            wrapper.xgBusDiagnosticWritten = true;
-        }
-    }
-    const auto available = wrapper.vlOutputCapacityFrames
-        - std::min(wrapper.vlEffectsCursor, wrapper.vlOutputCapacityFrames);
-    const auto count = std::min<std::size_t>(frames, available);
-    const auto sourceOffset = wrapper.vlEffectsCursor;
-    if (!wrapper.vlHookDiagnosticWritten) {
-        float peak = 0.0f;
-        for (std::size_t bus = 0; bus < vlOutputBusCount; ++bus) {
-            const auto* source = vlBus(wrapper, bus) + sourceOffset;
-            for (std::size_t frame = 0; frame < count; ++frame)
-                peak = std::max(peak, std::abs(source[frame]));
-        }
-        if (peak > 0.0f) {
-            reportBridgeDiagnostic("hook", static_cast<std::int32_t>(frames),
-                                   static_cast<std::int32_t>(sourceOffset), peak);
-            wrapper.vlHookDiagnosticWritten = true;
-        }
-    }
-    const auto mixBus = [&](std::size_t sourceBus,
-                            std::size_t destinationBus) noexcept {
-        const auto* source = vlBus(wrapper, sourceBus) + sourceOffset;
-        auto* destination = buses
-            + destinationBus * hybrid::XgEffectsBridge::busStrideFrames;
-        for (std::size_t frame = 0; frame < count; ++frame)
-            destination[frame] += source[frame] * xgInternalBusScale
-                * wrapper.nativeOutputGain;
-    };
-
-    mixBus(dryLeft, 0);
-    mixBus(dryRight, 1);
-    mixBus(reverbLeft, 2);
-    mixBus(reverbRight, 3);
-    mixBus(chorusLeft, 4);
-    mixBus(chorusRight, 5);
-    mixBus(variationLeft, 6);
-    mixBus(variationRight, 7);
-    if (!wrapper.xglOutputBuses.empty()) {
-        const auto mixXglBus = [&](std::size_t sourceBus,
-                                   std::size_t destinationBus) noexcept {
-            const auto* source = xglBus(wrapper, sourceBus) + sourceOffset;
-            auto* destination = buses
-                + destinationBus * hybrid::XgEffectsBridge::busStrideFrames;
-            for (std::size_t frame = 0; frame < count; ++frame) {
-                destination[frame] += source[frame] * xgInternalBusScale;
+    std::array<float*, muInputBusCount> inputs {};
+    if (frames < 0 || static_cast<std::size_t>(frames)
+            > wrapper.vlOutputCapacityFrames)
+        return inputs;
+    const bool insertion = wrapper.variationRouting.connection()
+            == hybrid::XgVariationConnection::insertion
+        && wrapper.variationRouting.assignedPart().has_value()
+        && wrapper.insertionEffectEnabled;
+    for (std::size_t bus = 0; bus < muInputBusCount; ++bus) {
+        auto* destination = wrapper.muInputBuses.data()
+            + bus * wrapper.vlOutputCapacityFrames;
+        inputs[bus] = destination;
+        for (std::int32_t frame = 0; frame < frames; ++frame) {
+            float native = 0.0f;
+            if (renderedVl) {
+                if (insertion && (bus == 8 || bus == 9))
+                    native = vlBus(wrapper, bus - 2)[frame];
+                else if (bus < vlOutputBusCount
+                         && !(insertion && (bus == 6 || bus == 7)))
+                    native = vlBus(wrapper, bus)[frame];
             }
-        };
-        mixXglBus(dryLeft, 0);
-        mixXglBus(dryRight, 1);
-        mixXglBus(reverbLeft, 2);
-        mixXglBus(reverbRight, 3);
-        mixXglBus(chorusLeft, 4);
-        mixXglBus(chorusRight, 5);
-        mixXglBus(variationLeft, 6);
-        mixXglBus(variationRight, 7);
+            destination[frame] = native * wrapper.nativeOutputGain
+                + (renderedXgl ? xglBus(wrapper, bus)[frame] : 0.0f);
+        }
     }
-    wrapper.vlEffectsCursor += frames;
+    return inputs;
 }
 
 vst2::IntPtr dispatch(vst2::AEffect* effect, std::int32_t opcode,
@@ -1995,8 +1904,6 @@ vst2::IntPtr dispatch(vst2::AEffect* effect, std::int32_t opcode,
     clearSg(*wrapper);
     wrapper->xgl.reset();
     if (wrapper->module != nullptr) {
-        if (wrapper->xgEffectsBridgeAvailable)
-            hybrid::XgEffectsBridge::release(wrapper->module);
         FreeLibrary(wrapper->module);
     }
     delete wrapper;
@@ -2008,27 +1915,13 @@ void process(vst2::AEffect* effect, float** inputs, float** outputs,
              std::int32_t frames)
 {
     auto& wrapper = *state(effect);
-    std::int32_t cachedPrefix {};
-    std::int32_t generatedFrames {};
-    const auto useEffects = wrapper.xgEffectsBridgeAvailable
-        && xgRenderWindow(wrapper, frames, cachedPrefix, generatedFrames);
-    const auto renderedVl = useEffects
-        ? renderVl(wrapper, generatedFrames, cachedPrefix)
-        : renderVl(wrapper, frames, 0);
-    const auto renderedXgl = renderXgl(
-        wrapper, useEffects ? generatedFrames : frames);
-    wrapper.vlEffectsCursor = 0;
-    if (useEffects && generatedFrames != 0)
-        hybrid::XgEffectsBridge::beginBlock(&wrapper, injectVlBuses);
+    const auto renderedVl = renderVl(wrapper, frames, 0);
+    const auto renderedXgl = renderXgl(wrapper, frames);
+    auto muInputs = prepareMuInputBuses(
+        wrapper, frames, renderedVl, renderedXgl);
     if (wrapper.child->process != nullptr)
-        wrapper.child->process(wrapper.child, inputs, outputs, frames);
-    if (useEffects && generatedFrames != 0)
-        hybrid::XgEffectsBridge::endBlock();
+        wrapper.child->process(wrapper.child, muInputs.data(), outputs, frames);
     clearChildEvents(wrapper);
-    if (renderedVl && !useEffects)
-        mixVlDry(wrapper, outputs, frames);
-    if (renderedXgl && !useEffects)
-        mixXglDry(wrapper, outputs, frames);
     wrapper.sgTimelineFrames += static_cast<std::uint64_t>(
         std::max(0, frames));
 }
@@ -2037,29 +1930,15 @@ void processReplacing(vst2::AEffect* effect, float** inputs, float** outputs,
                       std::int32_t frames)
 {
     auto& wrapper = *state(effect);
-    std::int32_t cachedPrefix {};
-    std::int32_t generatedFrames {};
-    const auto useEffects = wrapper.xgEffectsBridgeAvailable
-        && xgRenderWindow(wrapper, frames, cachedPrefix, generatedFrames);
-    const auto renderedVl = useEffects
-        ? renderVl(wrapper, generatedFrames, cachedPrefix)
-        : renderVl(wrapper, frames, 0);
-    const auto renderedXgl = renderXgl(
-        wrapper, useEffects ? generatedFrames : frames);
-    wrapper.vlEffectsCursor = 0;
-    if (useEffects && generatedFrames != 0)
-        hybrid::XgEffectsBridge::beginBlock(&wrapper, injectVlBuses);
+    const auto renderedVl = renderVl(wrapper, frames, 0);
+    const auto renderedXgl = renderXgl(wrapper, frames);
+    auto muInputs = prepareMuInputBuses(
+        wrapper, frames, renderedVl, renderedXgl);
     if (wrapper.child->processReplacing != nullptr)
-        wrapper.child->processReplacing(wrapper.child, inputs, outputs, frames);
+        wrapper.child->processReplacing(wrapper.child, muInputs.data(), outputs, frames);
     else if (wrapper.child->process != nullptr)
-        wrapper.child->process(wrapper.child, inputs, outputs, frames);
-    if (useEffects && generatedFrames != 0)
-        hybrid::XgEffectsBridge::endBlock();
+        wrapper.child->process(wrapper.child, muInputs.data(), outputs, frames);
     clearChildEvents(wrapper);
-    if (renderedVl && !useEffects)
-        mixVlDry(wrapper, outputs, frames);
-    if (renderedXgl && !useEffects)
-        mixXglDry(wrapper, outputs, frames);
     wrapper.sgTimelineFrames += static_cast<std::uint64_t>(
         std::max(0, frames));
 }
@@ -2092,12 +1971,12 @@ extern "C" __declspec(dllexport) vst2::AEffect* VSTPluginMain(
 
     const std::filesystem::path directory =
         std::filesystem::path(wrapperPath).parent_path();
-    const auto childPath = directory / L"syxg50-engine.bin";
+    const auto childPath = directory / L"mu2000-engine.bin";
     const auto module = LoadLibraryW(childPath.c_str());
     if (module == nullptr)
         return nullptr;
     const auto entry = reinterpret_cast<vst2::EntryPoint>(
-        GetProcAddress(module, "main"));
+        GetProcAddress(module, "VSTPluginMain"));
     if (entry == nullptr) {
         FreeLibrary(module);
         return nullptr;
@@ -2108,14 +1987,36 @@ extern "C" __declspec(dllexport) vst2::AEffect* VSTPluginMain(
     const auto reportedRate = static_cast<float>(
         host(nullptr, vst2::hostGetSampleRate, 0, 0, nullptr, 0.0f));
     const auto initialRate = reportedRate > 0.0f ? reportedRate : 44'100.0f;
-    const auto workerPath = directory / L"syxg2026-vl-worker.exe";
-    const auto sgWorkerPath = directory / L"syxg2026-sg-worker.exe";
+    const auto workerPath = directory / L"mu2026-vl-worker.exe";
+    const auto sgWorkerPath = directory / L"mu2026-sg-worker.exe";
     const auto xglEnginePath = directory / L"syxg2006le-engine.bin";
     const auto xglBankPath = directory / L"sxgbnw6l.tbl";
     const auto xglDataPath = directory / L"sxgdat6l.tbl";
+    auto romDirectory = directory / L"roms";
+    if (!std::filesystem::is_directory(romDirectory)) {
+        std::ifstream pointer(directory / L"roms.txt");
+        std::string line;
+        if (std::getline(pointer, line)) {
+            const std::filesystem::path specified(
+                std::u8string(line.begin(), line.end()));
+            romDirectory = specified.is_relative()
+                ? (directory / specified).lexically_normal() : specified;
+        }
+    }
+    auto catalog = std::make_unique<hybrid::MuVoiceCatalog>(
+        romDirectory / L"mu2000_flash.bin");
+    if (!catalog->valid()) {
+        FreeLibrary(module);
+        return nullptr;
+    }
 
     auto* child = entry(host);
     if (child == nullptr || child->magic != vst2::effectMagic) {
+        FreeLibrary(module);
+        return nullptr;
+    }
+    if (child->numInputs != static_cast<std::int32_t>(muInputBusCount)) {
+        child->dispatcher(child, vst2::close, 0, 0, nullptr, 0.0f);
         FreeLibrary(module);
         return nullptr;
     }
@@ -2149,6 +2050,7 @@ extern "C" __declspec(dllexport) vst2::AEffect* VSTPluginMain(
             wrapperState->vlAvailable, wrapperState->sgAvailable);
     wrapperState->status.setSampleRate(static_cast<std::uint32_t>(
         std::max(1.0f, std::round(initialRate))));
+    wrapperState->muVoiceCatalog = std::move(catalog);
     if (std::filesystem::is_regular_file(xglEnginePath)
         && std::filesystem::is_regular_file(xglBankPath)
         && std::filesystem::is_regular_file(xglDataPath)) {
@@ -2156,6 +2058,8 @@ extern "C" __declspec(dllexport) vst2::AEffect* VSTPluginMain(
             wrapperState->xgl = std::make_unique<hybrid::XglEngine>(
                 xglEnginePath, xglBankPath, host, initialRate,
                 static_cast<std::int32_t>(hybrid::NativeVlClient::maxFrames));
+            wrapperState->xgl->setMuVoiceCatalog(
+                wrapperState->muVoiceCatalog.get());
         } catch (const std::exception& error) {
             reportVlFailure("2006LE initialization failure", error.what());
         } catch (...) {
@@ -2171,14 +2075,7 @@ extern "C" __declspec(dllexport) vst2::AEffect* VSTPluginMain(
         wrapperState->nativeOutputCapacityFrames = 0;
         wrapperState->nativeOutputBuses.clear();
     }
-    wchar_t disableEffects[2] {};
-    const auto effectsDisabled = GetEnvironmentVariableW(
-        L"SYXG2026_DISABLE_XG_EFFECTS", disableEffects,
-        static_cast<DWORD>(std::size(disableEffects))) != 0;
-    wrapperState->xgEffectsBridgeAvailable = !effectsDisabled
-        && hybrid::XgEffectsBridge::acquire(module);
-    wrapperState->status.setEffectsBridgeAvailable(
-        wrapperState->xgEffectsBridgeAvailable);
+    wrapperState->status.setEffectsBridgeAvailable(true);
     wrapperState->status.setSupplementalEngineAvailable(
         wrapperState->xgl != nullptr);
     wrapperState->editor = std::make_unique<hybrid::HybridEditor>(
@@ -2191,6 +2088,7 @@ extern "C" __declspec(dllexport) vst2::AEffect* VSTPluginMain(
     effect->object = wrapperState;
     effect->processReplacing = processReplacing;
     effect->uniqueId = hybridUniqueId;
+    effect->numInputs = 0;
     effect->flags |= vst2::hasEditorFlag;
     return effect;
 }

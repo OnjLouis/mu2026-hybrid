@@ -236,10 +236,10 @@ int main(int argc, char** argv)
                 effect->numParams, effect->numOutputs, peak, postEventPeak,
                 postEventRms,
                 static_cast<unsigned long long>(sampleHash));
-    const bool identityPassed = std::strcmp(name.data(), "S-YXG2026 Hybrid") == 0
-        && std::strcmp(product.data(), "S-YXG2026 Hybrid") == 0
+    const bool identityPassed = std::strcmp(name.data(), "Mu2026 Hybrid") == 0
+        && std::strcmp(product.data(), "Mu2026 Hybrid") == 0
         && std::strcmp(vendor.data(), "Onj Research") == 0
-        && effect->uniqueId == 0x53324859;
+        && effect->uniqueId == 0x4d323648 && effect->numInputs == 0;
     effect->dispatcher(effect, vst2::mainsChanged, 0, 0, nullptr, 0.0f);
     effect->dispatcher(effect, vst2::close, 0, 0, nullptr, 0.0f);
     FreeLibrary(module);

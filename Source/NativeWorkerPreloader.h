@@ -37,6 +37,7 @@ public:
 
     void start() noexcept;
     void stop();
+    [[nodiscard]] bool preloadComplete() const;
     [[nodiscard]] PreloadedWorker<NativeVlClient> takeVl(std::uint8_t voice);
     [[nodiscard]] PreloadedWorker<NativeSgClient> takeSg();
 
@@ -65,7 +66,7 @@ private:
     State sgState { State::unavailable };
     std::unique_ptr<NativeSgClient> sgClient;
     std::string sgFailure;
-    std::mutex mutex;
+    mutable std::mutex mutex;
     std::condition_variable changed;
     std::thread loader;
     bool started {};

@@ -4,3 +4,8 @@
 *.dll
 *.exe
 *.wav
+*.bin
+*.tbl
+*.vxd
+roms/
+roms.txt

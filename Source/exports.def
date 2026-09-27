@@ -1,4 +1,4 @@
-LIBRARY "syxg2026-hybrid"
+LIBRARY "mu2026-hybrid"
 EXPORTS
     main=VSTPluginMain
     VSTPluginMain

@@ -40,6 +40,7 @@ const wchar_t* engineName(DisplayEngine engine,
     switch (engine) {
     case DisplayEngine::vl: return L"VL/PVL";
     case DisplayEngine::sg: return L"SG";
+    case DisplayEngine::le: return L"2006LE";
     default: return standardEngineName;
     }
 }

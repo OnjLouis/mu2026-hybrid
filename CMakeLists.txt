@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(SYXG2026Hybrid VERSION 0.1.7 LANGUAGES CXX)
+project(Mu2026Hybrid VERSION 0.1.0 LANGUAGES CXX)
 
 if(NOT WIN32 OR CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(FATAL_ERROR "S-YXG2026 Hybrid currently requires a 32-bit Windows target")
+    message(FATAL_ERROR "Mu2026 Hybrid currently requires a 32-bit Windows target")
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_library(SYXG2026Hybrid SHARED
+add_library(Mu2026Hybrid SHARED
     Source/HybridEditor.cpp
     Source/HybridEditor.h
     Source/HybridStatus.cpp
@@ -25,6 +25,9 @@ add_library(SYXG2026Hybrid SHARED
     Source/MidiSystemReset.h
     Source/MuVoiceMapSelector.cpp
     Source/MuVoiceMapSelector.h
+    Source/MuVoiceCatalog.cpp
+    Source/MuVoiceCatalog.h
+    Source/MuInsertionRouting.h
     Source/NativeSgClient.cpp
     Source/NativeSgClient.h
     Source/NativeVlClient.cpp
@@ -40,8 +43,6 @@ add_library(SYXG2026Hybrid SHARED
     Source/VlPartRouter.cpp
     Source/VlPartRouter.h
     Source/VlPluginVoiceBulk.h
-    Source/XgEffectsBridge.cpp
-    Source/XgEffectsBridge.h
     Source/XgPartModes.cpp
     Source/XgPartModes.h
     Source/XgVariationRouting.cpp
@@ -55,19 +56,19 @@ add_library(SYXG2026Hybrid SHARED
     Source/Vst2Abi.h
     Source/exports.def
 )
-set_target_properties(SYXG2026Hybrid PROPERTIES
-    OUTPUT_NAME "syxg2026-hybrid"
+set_target_properties(Mu2026Hybrid PROPERTIES
+    OUTPUT_NAME "mu2026-hybrid"
     PREFIX ""
 )
-target_compile_definitions(SYXG2026Hybrid PRIVATE
+target_compile_definitions(Mu2026Hybrid PRIVATE
     WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE
 )
-target_link_libraries(SYXG2026Hybrid PRIVATE
+target_link_libraries(Mu2026Hybrid PRIVATE
     comctl32 user32 gdi32 oleacc ole32 uuid
 )
-target_link_options(SYXG2026Hybrid PRIVATE -static -static-libgcc -static-libstdc++)
+target_link_options(Mu2026Hybrid PRIVATE -static -static-libgcc -static-libstdc++)
 
-add_executable(SYXG2026VlWorker
+add_executable(Mu2026VlWorker
     NativeWorker/VlNativeWorker.cpp
     Source/LeImageLoader.cpp
     Source/LeImageLoader.h
@@ -75,15 +76,15 @@ add_executable(SYXG2026VlWorker
     Source/NativeVlEngine.h
     Source/NativeVlProtocol.h
 )
-set_target_properties(SYXG2026VlWorker PROPERTIES
-    OUTPUT_NAME "syxg2026-vl-worker"
+set_target_properties(Mu2026VlWorker PROPERTIES
+    OUTPUT_NAME "mu2026-vl-worker"
 )
-target_compile_definitions(SYXG2026VlWorker PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
-target_link_options(SYXG2026VlWorker PRIVATE
+target_compile_definitions(Mu2026VlWorker PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_link_options(Mu2026VlWorker PRIVATE
     -municode -static -static-libgcc "-static-libstdc++"
 )
 
-add_executable(SYXG2026SgWorker
+add_executable(Mu2026SgWorker
     NativeWorker/SgNativeWorker.cpp
     Source/LeImageLoader.cpp
     Source/LeImageLoader.h
@@ -91,11 +92,11 @@ add_executable(SYXG2026SgWorker
     Source/NativeSgEngine.h
     Source/NativeVlProtocol.h
 )
-set_target_properties(SYXG2026SgWorker PROPERTIES
-    OUTPUT_NAME "syxg2026-sg-worker"
+set_target_properties(Mu2026SgWorker PROPERTIES
+    OUTPUT_NAME "mu2026-sg-worker"
 )
-target_compile_definitions(SYXG2026SgWorker PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
-target_link_options(SYXG2026SgWorker PRIVATE
+target_compile_definitions(Mu2026SgWorker PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_link_options(Mu2026SgWorker PRIVATE
     -municode -static -static-libgcc "-static-libstdc++"
 )
 
@@ -142,6 +143,32 @@ target_link_options(HybridEditorHostProbe PRIVATE
 )
 
 enable_testing()
+
+add_executable(MuVoiceCatalogTests
+    Tests/MuVoiceCatalogTests.cpp
+    Source/MuVoiceCatalog.cpp
+    Source/XglVoiceMap.cpp
+)
+target_link_options(MuVoiceCatalogTests PRIVATE
+    -static -static-libgcc -static-libstdc++)
+
+add_executable(MuFallbackRoutingTests
+    Tests/MuFallbackRoutingTests.cpp
+    Source/MuVoiceCatalog.cpp
+    Source/MuVoiceMapSelector.cpp
+    Source/XglEngine.cpp
+    Source/GsPartPitch.cpp
+    Source/XglVoiceMap.cpp
+    Source/XgPartModes.cpp
+    Source/XgVariationRouting.cpp
+)
+target_link_options(MuFallbackRoutingTests PRIVATE
+    -static -static-libgcc -static-libstdc++)
+
+add_executable(MuInsertionRoutingTests Tests/MuInsertionRoutingTests.cpp)
+target_link_options(MuInsertionRoutingTests PRIVATE
+    -static -static-libgcc -static-libstdc++)
+add_test(NAME MuInsertionRoutingTests COMMAND MuInsertionRoutingTests)
 
 add_executable(NativeSgStartupTests Tests/NativeSgStartupTests.cpp)
 target_include_directories(NativeSgStartupTests PRIVATE Source)

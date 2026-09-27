@@ -21,10 +21,18 @@ int main()
     status.setSupplementalEngineAvailable(true);
     assert(status.snapshot().supplementalEngineAvailable);
     auto snapshot = status.snapshot();
-    assert(snapshot.channels[2].engine == hybrid::DisplayEngine::xg);
+    assert(snapshot.channels[2].engine == hybrid::DisplayEngine::mu);
     assert(snapshot.channels[2].volume == 100);
     assert(snapshot.channels[2].pan == 64);
     assert(snapshot.channels[2].expression == 127);
+
+    status.observeShortMessage(message(0xb0, 2, 32, 112), false, false, true);
+    assert(status.snapshot().channels[2].engine == hybrid::DisplayEngine::le);
+    status.setSgRouteMask(1u << 2);
+    assert(status.snapshot().channels[2].engine == hybrid::DisplayEngine::sg);
+    status.setSgRouteMask(0);
+    assert(status.snapshot().channels[2].engine == hybrid::DisplayEngine::le);
+    status.reset(hybrid::ResetDisplayState::xg);
 
     status.setAvailability(true, true);
     status.setEffectsBridgeAvailable(true);
@@ -75,7 +83,7 @@ int main()
     assert(snapshot.lastReset == hybrid::ResetDisplayState::gm2);
     assert(snapshot.sgRouteMask == 0);
     assert(!snapshot.explicitVlAssignments);
-    assert(snapshot.channels[2].engine == hybrid::DisplayEngine::xg);
+    assert(snapshot.channels[2].engine == hybrid::DisplayEngine::mu);
     assert(snapshot.channels[2].bankMsb == 0);
     assert(snapshot.channels[2].program == 0);
     assert(snapshot.channels[2].expression == 127);

@@ -12,10 +12,12 @@
 
 namespace hybrid {
 
+class MuVoiceCatalog;
+
 class XglEngine {
 public:
     static constexpr std::size_t partCount = 16;
-    static constexpr std::size_t busCount = 8;
+    static constexpr std::size_t busCount = 10;
 
     XglEngine(const std::filesystem::path& enginePath,
               const std::filesystem::path& bankPath,
@@ -28,6 +30,8 @@ public:
 
     void setSampleRate(float sampleRate);
     void setBlockSize(std::int32_t blockSize);
+    void setMuVoiceCatalog(const MuVoiceCatalog* catalog) noexcept;
+    bool selectedVoice(std::uint8_t channel) const noexcept;
     void reset(MidiSystemReset system = MidiSystemReset::xg);
 
     // Returns true only when a note-on belongs to a voice rendered by 2006LE.
