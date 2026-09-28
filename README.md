@@ -24,6 +24,8 @@ does not prove that its optional expansion board is emulated.
 can replace only the files listed in its signed manifest. It leaves local ROMs,
 Yamaha files, `mu2026.ini`, and `roms.txt` untouched. Close audio hosts before
 installing an update. The rollback ZIP is kept outside the plugin directory.
+For a fresh install, copy [Config/mu2026.ini](Config/mu2026.ini) beside the VST
+DLL. These are the settings used in the Foobar performance and gain checks.
 
 ## First-pass verification
 
@@ -49,8 +51,8 @@ VL/SG balance at gain 2.0 was judged clean in two complete songs.
 
 ## Build
 
-Build the modified S-MU2000 VST2 target as 32-bit Windows, then build this
-repository with CMake and a 32-bit MinGW compiler. Rename the MU engine DLL to
+Build the modified S-MU2000 VST2 target from the linked fork as 32-bit Windows,
+then build this repository with CMake and a 32-bit MinGW compiler. Rename the MU engine DLL to
 `mu2000-engine.bin` beside `mu2026-hybrid.dll`. Place the generated VL and SG
 worker executables there as well. Run `ctest` in the wrapper build directory.
 
