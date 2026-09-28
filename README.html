@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mu2026 Hybrid - local test build</title>
+  <title>Mu2026 Hybrid - User Guide</title>
 </head>
 <body>
   <main>
@@ -14,17 +14,27 @@
     <p>MU2000 supplies the main XG voice set. Where a requested voice is not distinct in the MU2000 program ROM, the S-YXG2006LE engine can supply its additional voice. Native VL/PVL and SG workers handle their own MIDI parts. The plugin's unique ID and name differ from the existing Yamaha plugins.</p>
 
     <h2>Effects</h2>
-    <p>The modified MU2000 engine accepts ten internal audio channels: stereo dry, reverb, chorus, variation, and insertion 1. Audio produced by the 2006LE and native workers is mixed into those channels before MU2000 processes its own effects. MU2000 voices retain the effects already implemented by S-MU2000, including its other insertion processors. XG50 is neither loaded nor used for effects or voices.</p>
+    <p>The modified MU2000 engine accepts twelve internal audio channels: stereo dry, reverb, chorus, variation, insertion 1, and insertion 2. Audio from 2006LE and the native workers enters the appropriate MU2000 effect path before final output. Insertion 2 uses the MU2000 slave DSP. MU2000 voices retain the effects implemented by S-MU2000. XG50 is neither loaded nor used for effects or voices.</p>
+    <p>Insertion 2 follows the MIDI part assigned by Yamaha SysEx. VL voices and 2006LE parts are routed separately. SG uses insertion 2 only when its worker output belongs to one assigned channel; a combined multi-channel SG output cannot safely be separated at this point.</p>
+    <p>External audio is level-matched before it enters MU2000's effects. The modified engine retains headroom above unity at that input so louder SG passages are not clipped before the effects stage. MU2000's own voices are unchanged.</p>
 
     <h2>Required files</h2>
     <p>Keep the VST DLL, <code>mu2000-engine.bin</code>, both worker executables, <code>syxg2006le-engine.bin</code>, its two table files, and both VXD files together. Provide the MU2000 program and wave ROMs in a <code>roms</code> subfolder. For a local test, <code>roms.txt</code> can instead contain a relative path to an existing S-MU2000 ROM directory. Relative paths are resolved from the plugin folder. ROMs and Yamaha binaries are not part of public source.</p>
     <p>The program ROM is <code>mu2000_flash.bin</code>. The four 8 MB wave ROMs are <code>xv364a0.ic49</code>, <code>xv365a0.ic50</code>, <code>xw848a0.ic53</code>, and <code>xw849a0.ic54</code>, placed in the ROM layout expected by S-MU2000.</p>
 
+    <h2>Instrument definitions and updates</h2>
+    <p>The source repository includes definitions for QWS and Reaper. They combine the existing MU1000/MU2000 voice names with VL/PVL and SG names. Some inherited PLG expansion names may describe optional hardware that this plugin does not emulate.</p>
+    <p>Run <code>Update Yamaha Hybrids.cmd</code> from the plugin folder or its parent to check for signed code updates. Close Foobar, REAPER, VSTHost, and other audio hosts before installing. The updater preserves locally supplied Yamaha data, <code>mu2026.ini</code>, and <code>roms.txt</code>. It stores a compressed rollback outside the plugin folder.</p>
+
+    <h2>Foobar preview settings</h2>
+    <p>For local testing, place <code>mu2026.ini</code> beside the VST DLL with <code>[engine]</code>, <code>native=1</code>, and <code>suspend_unused=1</code> on separate lines. Native mode reduces MU2000 CPU use while preserving its MEG effects, although some physical-engine edge cases may differ. The suspension setting makes instances that have never received MIDI return silence without rendering the MU engine. Foobar's MIDI component loads three instances; with a single-port song, this avoids spending audio-thread time on the two silent ones. An instance starts normal rendering as soon as it receives any MIDI event. Neither option changes the standalone S-MU2000 plugin.</p>
+    <p><code>vl_sg_gain</code> in the same section sets the VL/SG worker gain before MU2000 effects. The default is 2.0, which balanced complete local VL and SG songs in listening tests. It does not change MU2000 or 2006LE voices.</p>
+
     <h2>Current limits</h2>
-    <p>Internal worker audio injection is proven through MU2000 dry, reverb, chorus, variation, and insertion 1 at 44.1 and 48 kHz. This is not yet proof of exact physical PLG-board command or timing behavior, or that every song's effect parameters translate perfectly. Host-level MIDI playback, long sessions, and audible comparisons against hardware still need testing. Do not treat this build as a public release.</p>
+    <p>Internal audio injection is tested through MU2000 dry, reverb, chorus, variation, insertion 1, and insertion 2 at 44.1 and 48 kHz. FatPizz restores its distorted VL part, and unaffected ForYou and SG_yuki renders remain byte-identical to the previous candidate. A complete offline StarStrp render completed, and Foobar playback remained smooth during a Paperback foreground test. External audio through insertions 3 and 4 has not been implemented. A first VL note can still cause an audio-thread setup spike; 96-sample live buffers, long sessions, and physical PLG-board fidelity need more testing. This does not prove that every song's effect parameters translate perfectly.</p>
 
     <h2>Licensing</h2>
-    <p>The wrapper is based on S-YXG2026 Hybrid and retains its MIT license. The modified S-MU2000 engine retains its BSD 3-Clause license and third-party notices. Yamaha firmware, ROMs, tables, and VXD files remain the user's own separately supplied material.</p>
+    <p>The wrapper is based on S-YXG2026 Hybrid and retains its MIT license. The modified <a href="https://github.com/OnjLouis/mu2026-smu-engine">S-MU2000 engine fork</a> credits <a href="https://github.com/tarboh/S-MU2000">the original project by tarboh</a> and retains its BSD 3-Clause license and third-party notices. Yamaha firmware, ROMs, tables, and VXD files are not covered by those code licenses and must be supplied separately by users with appropriate rights.</p>
   </main>
 </body>
 </html>

@@ -1,0 +1,3275 @@
+// Mu2026 Hybrid instrument definition for REAPER
+// Generated from the combined QWS definition. Programs are zero-based.
+
+Bank 0 0 Mu2026 Hybrid - MU2000 main voices
+0 +GrandP#
+1 +BriteP#
+2 El.Grand
+3 HnkyTonk
+4 +EPiano1#
+5 +EPiano2#
+6 Harpsi.
+7 +Clavi #
+8 Celesta
+9 Glocken
+10 MusicBox
+11 Vibes
+12 Marimba
+13 Xylophon
+14 TubulBel
+15 Dulcimer
+16 +DrawOrg#
+17 +PercOrg#
+18 +RockOrg#
+19 ChrchOrg
+20 ReedOrgn
+21 Acordion
+22 Harmnica
+23 +TangoAc#
+24 +NylonGt#
+25 +SteelGt#
+26 +JazzGtr#
+27 CleanGtr
+28 +MuteGtr#
+29 +Ovrdriv#
+30 +DistGtr#
+31 GtrHarmo
+32 +AcoBass#
+33 +FngrBa#
+34 PickBass
+35 +Frtless#
+36 +SlapBa1#
+37 +SlapBa2#
+38 SynBass1
+39 SynBass2
+40 +Violin#
+41 Viola
+42 Cello
+43 Contrabs
+44 +TremStr#
+45 Pizz.Str
+46 Harp
+47 Timpani
+48 +Strngs1#
+49 +Strngs2#
+50 Syn Str1
+51 Syn Str2
+52 ChoirAah
+53 VoiceOoh
+54 SynVoice
+55 Orch.Hit
+56 +Trumpet#
+57 +Trmbone#
+58 Tuba
+59 +MuteTrp#
+60 Fr. Horn
+61 +BrssSec#
+62 SynBrss1
+63 SynBrss2
+64 SprnoSax
+65 +AltoSax#
+66 TenorSax
+67 Bari.Sax
+68 +Oboe#
+69 Eng.Horn
+70 Bassoon
+71 Clarinet
+72 Piccolo
+73 +Flute#
+74 Recorder
+75 +PanFlut#
+76 Bottle
+77 Shakhchi
+78 Whistle
+79 Ocarina
+80 SquareLd
+81 Saw Ld
+82 CaliopLd
+83 Chiff Ld
+84 CharanLd
+85 Voice Ld
+86 Fifth Ld
+87 Bass&Ld
+88 NewAgePad
+89 Warm Pad
+90 PolySyPd
+91 ChoirPad
+92 BowedPad
+93 MetalPad
+94 Halo Pad
+95 SweepPad
+96 Rain
+97 SoundTrk
+98 Crystal
+99 Atmosphr
+100 Bright
+101 Goblins
+102 Echoes
+103 Sci-Fi
+104 Sitar
+105 Banjo
+106 Shamisen
+107 Koto
+108 Kalimba
+109 Bagpipe
+110 Fiddle
+111 Shanai
+112 TnklBell
+113 Agogo
+114 SteelDrm
+115 Woodblok
+116 TaikoDrm
+117 MelodTom
+118 Syn Drum
+119 RevCymbl
+120 FretNoiz
+121 BrthNoiz
+122 Seashore
+123 Tweet
+124 Telphone
+125 Helicptr
+126 Applause
+127 Gunshot
+
+Bank 0 1 Mu2026 Hybrid - MU2000 bank 0:1
+0 GrndPnoK
+1 BritPnoK
+2 ElGrPnoK
+3 HnkyTnkK
+4 El.Pno1K
+5 El.Pno2K
+6 Harpsi.K
+7 Clavi.K
+11 VibesK
+12 MarimbaK
+
+Bank 0 3 Mu2026 Hybrid - MU2000 bank 0:3
+1 +StBrtPno
+16 +StDrawOr
+48 S.Strngs
+49 S.SlwStr
+52 S.Choir
+61 StBrsSec ***
+
+Bank 0 6 Mu2026 Hybrid - MU2000 bank 0:6
+34 PickBa 2
+39 MelloSBa
+60 FrHrSolo
+80 SquarLd2
+81 Saw Ld 2
+
+Bank 0 8 Mu2026 Hybrid - MU2000 bank 0:8
+40 Slow Vln
+44 SlwTrStr
+48 Slow Str
+49 LegatoSt
+50 +Memory
+64 +VgSprnSx
+80 LMSquare
+81 ThickSaw
+86 +FifthLdS
+102 Echoes 2
+
+Bank 0 12 Mu2026 Hybrid - MU2000 bank 0:12
+5 +ChoEPDcy
+30 DstRthmG **
+39 Seq Bass
+55 LoFi Hit ***
+62 Quack Br
+98 SynDrCmp
+
+Bank 0 14 Mu2026 Hybrid - MU2000 bank 0:14
+48 +SfzStrgs
+61 SfrzndBr **
+98 Popcorn
+102 Echo Pan
+
+Bank 0 16 Mu2026 Hybrid - MU2000 bank 0:16
+24 NylonGt2
+25 SteelGt2
+37 +BrtSlpSp
+52 Ch.Aahs2
+56 Trumpet2
+58 Tuba 2
+87 Big&Low
+89 ThickPad
+
+Bank 0 17 Mu2026 Hybrid - MU2000 bank 0:17
+56 BriteTrp
+89 Soft Pad
+
+Bank 0 18 Mu2026 Hybrid - MU2000 bank 0:18
+0 MelloGrP
+4 MelloEP1
+26 MelloGtr
+33 FingrDrk
+38 SynBa1Dk
+39 ClkSynBa
+50 +Zephyr
+57 Trmbone2
+61 MildBrss ***
+63 Soft Brs
+65 +ASax Lgt
+80 Hollow
+81 Dyna Saw
+89 Sine Pad
+98 TinyBell
+99 WarmAtms
+
+Bank 0 19 Mu2026 Hybrid - MU2000 bank 0:19
+39 SynBa2Dk
+80 Shroud
+81 Digi Saw
+99 HollwRls
+
+Bank 0 20 Mu2026 Hybrid - MU2000 bank 0:20
+1 +ResoBrtP
+38 FastResB
+62 RezSynBr
+81 Big Lead
+95 Shwimmer
+
+Bank 0 21 Mu2026 Hybrid - MU2000 bank 0:21
+36 +CsmicSlp
+38 +TL66
+51 +TradeWnd
+
+Bank 0 22 Mu2026 Hybrid - MU2000 bank 0:22
+37 +Wah Slap
+39 +Zealot
+
+Bank 0 24 Mu2026 Hybrid - MU2000 bank 0:24
+17 70sPcOr1
+30 DistGtr2 **
+38 AcidBass
+48 Arco Str
+62 PolyBrss
+81 HeavySyn
+85 SynthAah
+
+Bank 0 25 Mu2026 Hybrid - MU2000 bank 0:25
+6 Harpsi.2
+24 NylonGt3
+81 WaspySyn
+
+Bank 0 26 Mu2026 Hybrid - MU2000 bank 0:26
+81 Mondo ***
+
+Bank 0 27 Mu2026 Hybrid - MU2000 bank 0:27
+7 ClaviWah
+33 FlangeBa
+36 ResoSlap
+38 ResoBass ***
+50 Reso Str
+62 SynBrss3
+81 RezzySaw ***
+95 Converge
+97 Prologue
+
+Bank 0 28 Mu2026 Hybrid - MU2000 bank 0:28
+34 MutePkBa
+38 +MtdPulsB
+105 MuteBnjo
+
+Bank 0 29 Mu2026 Hybrid - MU2000 bank 0:29
+38 +SlwAttck
+62 +AnalgSfz
+
+Bank 0 32 Mu2026 Hybrid - MU2000 bank 0:32
+1 +DtndBrtP
+2 Det.CP80
+4 Chor.EP1
+5 Chor.EP2
+6 HarpsiDt
+16 DetDrwOr
+17 DetPrcOr
+19 ChurOrg3
+20 +ReedOrDt
+21 AccordIt
+22 Harmo. 2
+24 +NylnGtDt
+25 +StlGtrDt
+26 Jazz Amp
+27 ChorusGt
+29 +OdrvGtDt
+33 +FngrBaDt
+35 Fretles2
+36 PunchThm
+39 SmthSynB
+52 MelChoir
+56 Warm Trp
+60 FrHorn 2
+62 JumpBrss
+81 DoublSaw ***
+104 DetSitar
+
+Bank 0 33 Mu2026 Hybrid - MU2000 bank 0:33
+5 DX Hard
+16 60sDrOr1
+17 Lite Org
+27 +ChoGtrLt
+35 Fretles3
+
+Bank 0 34 Mu2026 Hybrid - MU2000 bank 0:34
+5 DXLegend
+16 60sDrOr2
+35 Fretles4
+
+Bank 0 35 Mu2026 Hybrid - MU2000 bank 0:35
+2 +Synth CP
+6 Harpsi.3
+15 Dulcimr2
+16 70sDrOr1
+19 ChurOrg2
+25 12StrGtr
+30 DistGtr3 **
+38 Clv Bass
+45 +Pizz Oct
+48 60sStrng
+50 Syn Str3 **
+55 OrchHit2
+61 Tp&TbSec
+80 2 Osc ***
+81 Toy Lead ***
+86 Big Five
+98 RndGlock
+104 Sitar 2
+
+Bank 0 36 Mu2026 Hybrid - MU2000 bank 0:36
+16 DrawOrg2
+30 PowerGt2 **
+61 Tp&TbSc2 ***
+81 Dim Saw ***
+
+Bank 0 37 Mu2026 Hybrid - MU2000 bank 0:37
+16 60sDrOr3
+17 PercOrg2
+30 PowerGt1 **
+60 HornOrch
+
+Bank 0 38 Mu2026 Hybrid - MU2000 bank 0:38
+16 Even Bar
+30 Dst.5ths **
+
+Bank 0 39 Mu2026 Hybrid - MU2000 bank 0:39
+50 +Monarchy
+51 +WormHole
+52 +Gasp
+61 BrssFall **
+
+Bank 0 40 Mu2026 Hybrid - MU2000 bank 0:40
+0 PianoStr
+1 +SyPadPno
+2 LayerCP1
+4 HardEl.P
+5 DX Phase
+6 +ElHarpsi
+7 +CsmcClav
+16 16+2"2/3
+19 NotreDam
+20 Puff Org
+24 +Wayside
+25 Nyln&Stl
+26 +OrganGtr
+28 FunkGtr1
+29 +Parallel
+30 FeedbkGt
+32 JazzRthm
+33 Ba&DstEG
+34 +PkB&MtGt
+38 TechnoBa
+39 ModulrBa
+40 +Unison
+41 +VlaDoubl
+44 Susp.Str
+45 +Sleep
+46 YangChin
+48 Orchestr
+49 Warm Str
+50 GrandPad ***
+52 ChoirStr
+54 SyVoice2
+55 +Throne
+56 +Backyard
+61 BrssSec2
+62 SyBrsSub ***
+63 SynBrss4
+65 Sax Sect
+66 BrthTnSx
+71 +Syn&Clr
+73 +Brthy Fl
+81 PulseSaw
+82 +Novice
+83 +SaltLead
+89 +Vishnu
+94 +Tiu
+98 GlockChi
+99 Nylon EP
+104 +Bhuj
+
+Bank 0 41 Mu2026 Hybrid - MU2000 bank 0:41
+0 Dream
+2 LayerCP2
+5 DX+Analg
+25 Stl&Body
+26 +OctPlate
+28 MuteStlG
+30 FeedbkG2
+32 +PckAcoBa
+38 +Kik'n'Ba
+39 DX Bass
+48 Orchstr2
+49 Kingdom
+50 +SweepStr
+52 +Dead Sea
+54 Choral
+61 Hi Brass
+63 ChoirBrs
+66 SoftTenr
+81 Dr.Lead
+98 ClearBel
+
+Bank 0 42 Mu2026 Hybrid - MU2000 bank 0:42
+5 DXKotoEP
+30 +TwinDist
+38 +NEP
+39 +DXBa Brt
+48 TremOrch
+50 +SwpStOct
+61 MelloBrs
+63 +AnHrnRch
+98 ChorBell
+
+Bank 0 43 Mu2026 Hybrid - MU2000 bank 0:43
+24 VelGtHrm
+28 FunkGtr2
+29 Gt.Pinch
+30 RckRthm2 **
+32 +Blink Ba
+33 FngrSlap
+37 VeloSlap
+47 +Roll&Hit
+65 HyprAlto
+
+Bank 0 45 Mu2026 Hybrid - MU2000 bank 0:45
+4 VX El.P1
+5 VX El.P2
+11 HardVibe
+28 Jazz Man
+30 RckRthm1 **
+32 VXUprght
+33 FngBass2
+48 Velo.Str
+62 AnVelBr1
+63 AnVelBr2
+81 VeloLead
+96 ClaviPad
+
+Bank 0 48 Mu2026 Hybrid - MU2000 bank 0:48
+5 +ChoEP K
+
+Bank 0 52 Mu2026 Hybrid - MU2000 bank 0:52
+5 +DXMallet
+48 +Lento
+61 +Bund
+
+Bank 0 53 Mu2026 Hybrid - MU2000 bank 0:53
+61 +FakeHorn
+
+Bank 0 54 Mu2026 Hybrid - MU2000 bank 0:54
+61 +FkHrnOct
+
+Bank 0 64 Mu2026 Hybrid - MU2000 bank 0:64
+0 +ConGrnd
+1 +BrConGrd
+4 60sEl.P1
+5 +Shrakawa
+6 +SynHrpsi
+7 PulseClv
+8 +FMCelesta
+10 Orgel
+12 SineMrmb
+16 Organ Ba
+17 JazOrgan ***
+18 RotaryOr
+19 OrgFlute
+20 +SyReedDk
+23 TngoAcd2
+24 +EsGuitar
+25 +Nashvlle
+26 +SuperJzM
+27 CleanGt2 **
+28 +Wrench
+29 +ManhttnM
+30 +Bite
+31 AcoHarmo **
+32 +Boston
+33 Jazzy Ba **
+34 +HardPick
+35 +PwrFrtls
+36 Slapper ***
+38 Orbiter
+39 X WireBa
+40 +Cadenza
+41 +Sonata
+42 ++CelloSec
+43 ++CB Sec
+44 +Fear
+45 ++Collegno
+46 El.Harp
+48 +SprStrng
+49 70s Str
+50 Syn Str4
+51 +Hope
+52 StrngAah **
+53 VoiceDoo **
+54 AnaVoice
+55 Impact
+56 Dark Trp ***
+57 BrghtTrb ***
+58 +++Hrd Tuba
+59 MuteTrp2 **
+60 +Syn Horn
+61 +SprBrass
+62 AnaBrss1
+63 AnaBrss2
+64 +Mdtation
+65 +ASaxPwrd
+66 TnrSax 2
+68 +Heinz
+73 +Boehm
+74 +Piplith
+75 PanFlut2 **
+76 +BottlLgt
+78 +Reverie
+79 +Opalina
+80 Mellow
+81 Digger ***
+82 Vent Syn **
+83 Rubby
+84 DistLead
+85 Vox Lead
+87 Fat&Prky
+88 Fantasy
+89 Horn Pad
+90 PolyPd80
+91 Heaven
+92 Glacier
+93 Tine Pad
+94 +Aries
+95 PolarPad
+96 HrmoRain
+97 Ancestrl
+98 SynMalet
+99 NylnHarp
+100 FantaBel
+101 GobSynth
+102 EchoBell
+103 Starz
+104 +Raga Syn
+105 +El Banjo
+107 +FM Koto
+108 BigKalim **
+109 +Thistle
+111 Shanai 2
+112 +TcklBell
+117 Mel Tom2
+118 Ana Tom
+119 Rev Cym2**
+
+Bank 0 65 Mu2026 Hybrid - MU2000 bank 0:65
+0 +ConGrndK
+1 +BrConGrK
+4 +Old EP
+5 +OldEP Tn
+7 PierceCl
+10 +SmalOrgl
+16 70sDrOr2
+17 WarmJzOr ***
+18 SloRotar
+19 TrmOrgFl
+23 +TightAcd
+24 +EsGtrHrd
+25 +NashvllR
+26 +SuperJzB
+27 MidT.Gtr ***
+28 +WrenchHv
+29 +ManhttnB
+30 +Bite Res
+31 GtFeedbk
+32 +BostnBrt
+33 Mod.Bass
+34 +HrdPikRs
+35 +PwrFrtlR
+36 Thum&Slp ***
+38 Sqr.Bass
+39 AtkPulse ***
+40 +CadenzDk
+41 ++Vla Sec
+42 ++Hrd Vcs
+43 ++Hrd CBs
+44 +Fear Dtd
+48 +SprStrSt
+49 Strings3
+50 Syn Str5
+51 +Virgo
+52 Male Aah **
+53 +Hmn
+54 +Aspirate
+55 BrssStab **
+56 DrkTpSft ***
+57 MellowTb ***
+58 +++Slw Tuba +++
+59 +Bkstairs
+60 HornOrc2
+61 +SprBrCut
+62 +SynthThn
+63 +Soft Cut
+64 +MdtatnRs
+65 +FakeAlto
+66 +SprTenor
+68 +HeinzUni
+73 +Boehm Br
+74 +Home
+75 +Meadow
+80 SoloSine
+81 +Dunce
+82 PureLead
+83 HardSync ***
+84 WireLead
+85 Br.Layer ***
+87 Soft Wrl
+88 +Libra
+89 RotarStr
+90 ClickPad
+91 Lite Pad **
+92 GlassPad
+93 Pan Pad
+94 ChorusPd
+95 Sweepy **
+96 AfrcnWnd
+97 Rave **
+98 SftCryst
+99 Harp Vox
+100 ShinStar
+101 Creeper
+102 Big Pan
+103 Odin **
+117 Real Tom
+118 ElecPerc
+119 Rev Cym3
+
+Bank 0 66 Mu2026 Hybrid - MU2000 bank 0:66
+0 +DblConGr
+1 +MIDIGrd3
+4 +Tribecca
+5 +Flips
+7 +ClrClavi
+16 CheezOrg
+17 ClikOrgn ***
+18 FstRotar
+23 +TghtAcdD
+24 +EsGtMllo
+25 +Nashvl12
+26 +SuperJzD
+27 MidTGtSt ***
+28 +WrnchDbl
+29 +ManhttnD
+30 +BiteDtd
+31 GtrHrmo2
+32 +Coolth
+33 +Chase
+34 +PkBass+
+35 +TalkinBa
+36 +GltzySlp
+38 RubberBa
+39 CS Light ***
+40 ++Vln Sec
+41 ++Hrd Vlas
+42 ++Slw Vcs
+43 ++Slw CBs
+44 +Apoclyps
+48 +Triste
+50 +Solitude
+51 +Platinum
+52 +Scroll
+53 +WrlChoir
+54 +AsprateD
+55 DoublHit **
+56 +Soft Trp
+57 +JJJ
+58 +++Euphon
+60 +++Brt Horn
+61 +SprBrBlw
+62 +SyncBrss
+63 +AnaHornS
+65 +FakeAlt+
+66 +SprTnr +
+68 Oboe Exp
+73 +Pastoral
+80 SineLead
+81 +BrassSaw
+82 +ElPrimtv
+84 SynPluck ***
+85 +Cypher 1
+87 +Cant
+88 Bell Pad
+89 +++LightPad
+90 Ana. Pad
+91 Itopia
+92 +SqrTwang
+93 +Queever
+95 Celstial
+96 Carib
+97 Fairy ***
+98 LoudGlok
+99 AtmosPad
+100 BritStab
+101 Ring Pad
+102 SynPiano
+117 Rock Tom
+118 Syn Perc
+
+Bank 0 67 Mu2026 Hybrid - MU2000 bank 0:67
+0 +MIDIGrd1
+1 +MIDIGrd4
+4 +Diploid1
+5 +FlipsDtd
+7 +SwpClavi
+16 DrawOrg3
+17 +Grace
+18 +GlaclRtr
+24 +EsGtrDcy
+25 +++OldSmple
+26 +SuperJzR
+27 NasalGtr ***
+28 +Tin
+29 +ManhttnP
+30 +Bite +
+31 +Shimla
+32 +Coolth B
+33 +ChaseRes
+34 PickBa 4
+35 +NoizFrtl
+36 +FM Slap
+38 Fish ***
+39 MetlBass ***
+40 ++Hrd Vlns
+41 ++Slw Vlas
+44 +++Brt Trem
+48 +Basso
+50 +Fate
+51 +OctavPWM
+52 +Scroll +
+53 +++Ooh St
+54 +Facula
+55 BrStab80 **
+56 +Blow
+57 +++BrllntTb
+60 +++Hrd Horn
+61 +Pwrd Sfz
+62 +SyncBrSt
+65 +FakeAltD
+66 +SprTnrSt
+73 +Shepherd
+80 Pulse Ld ***
+81 +SawRiver
+84 +++The Sync
+85 +Cypher 2
+87 +Mogul
+90 SquarPad
+91 CC Pad
+92 SquarPd8
+95 +Monsoon
+97 +Hermit
+98 ChrstBel
+99 Planet
+101 Ritual
+102 Creation
+117 +++Tim'sSet
+
+Bank 0 68 Mu2026 Hybrid - MU2000 bank 0:68
+0 +MIDIGrd2
+1 +OldPiano
+4 +Flops
+5 +Flicks
+7 +SynClavi
+16 StdiumOr ***
+17 +CrnGrace
+26 +Dx JzGtr
+27 NaslGtSt ***
+28 +++GrooveMt
+30 +Burnout
+33 +BlueBass
+36 +FMSlpDtd
+38 HardReso ***
+39 +FrcOscBa
+40 ++Slw Vlns
+48 ++Stacc H
+50 +Thulium
+51 +Taurus
+52 +++Aah St
+55 Bass Hit ***
+56 +Blow Dbl
+57 +++Hrd Tb
+61 +PwrSfzBr
+62 +AnaHorn1
+66 +Tnr&Alto
+80 SyncLead ***
+81 +BrPulsDb
+85 +Cypher 3
+87 +Distance
+90 Show Pad ***
+91 CosmicPd ***
+95 +lo
+98 VibeBell
+99 +Lyra
+101 ToHeaven
+102 StarDust
+
+Bank 0 69 Mu2026 Hybrid - MU2000 bank 0:69
+0 +++OldestAP
+4 +Soho
+5 +FliksDtd
+7 +SprClavi
+16 StdiumO2 ***
+17 +DimClick
+26 +DXJzGt.D
+27 +Hammer M
+30 +Bombay
+33 JazzyBa2
+38 +Wah Saw
+39 +Cubit
+48 ++Stacc L
+50 +Brook
+51 +Frost
+52 +++Aah Mix
+55 BassHit+ ***
+56 4th TP
+57 +++BrtBTb
+61 +Alto&Trp
+62 +AnaHorn2
+80 +ForcdOsc
+81 +Saw Trp
+85 +SprCyphr
+87 +Sync B&L
+90 +Pixie
+91 +++Aah Pad
+98 DigiBell
+99 +Akasaka
+101 MilkyWay **
+102 Reso&Pan
+
+Bank 0 70 Mu2026 Hybrid - MU2000 bank 0:70
+4 +FlopsDtd
+5 +BrightDX
+7 +GtrClavi
+16 GospelOr ***
+17 +Dusk
+26 +PulsJazz
+27 +Hammer B
+30 +Bombay S
+33 FngBass3
+38 +Pluto
+39 +Cubit +
+48 Hall Str
+50 +Brook St
+51 +Leo
+52 +++Aah Orch
+55 6th Hit ***
+56 Synth Tp
+57 +++Hrd Btb
+61 +Tnr&Trp
+62 +AnHrnOct
+80 +Accent
+81 +Hue
+87 Ba Lead
+90 +Pisces
+91 +++Ooh Pad
+98 AirBells
+99 +DgBermda
+101 Night
+102 Ana Echo
+
+Bank 0 71 Mu2026 Hybrid - MU2000 bank 0:71
+4 +Diploid2
+5 +BrtDXDtd
+7 +HardyPlk
+16 ClkGsplO ***
+17 +FM Click
+26 +RghcastN
+27 +Hammer D
+30 +Jaipur
+38 +Pluto +
+39 +Keel
+48 Str/FHrn
+50 OldSynSt
+51 +SolPlexs
+55 6thHit + ***
+56 +++Sweet Tp
+61 +BrssBros
+62 +SawBrPwr
+80 +Brick
+81 +StrghtSw
+90 +Spiral
+91 +++Ooh Aah
+98 BellHarp
+99 Cloud Pd
+101 Glisten
+
+Bank 0 72 Mu2026 Hybrid - MU2000 bank 0:72
+4 +Brooklyn
+5 +Kitayama
+7 +HrdyPlk
+16 ChapelOr ***
+17 +Spoony
+26 +RghcastM
+27 +HammerSt
+38 +Stimuli
+39 +KeelPwrd
+48 +++SolidStr
+51 SunRise
+55 Euro Hit ***
+56 +++Mllw Swt
+61 +VagueBro
+80 +Alum
+81 +StrtPuls
+90 PolySPd2
+98 Gamelmba
+99 PulseKey
+101 Puffy **
+
+Bank 0 73 Mu2026 Hybrid - MU2000 bank 0:73
+4 +Diploid3
+5 +Turnpik1
+7 +FMClavDb
+16 +DimChors
+17 +SprRotry
+27 +FMChoGtr
+38 +RunPulse
+39 +PlnPulse
+48 +++SwellStr
+55 EuroHit+ ***
+56 +++NormTps
+61 BrssSec3
+80 +Query
+81 +PWMania
+90 PolyPdKg
+98 +Bounce
+99 NoisePno
+101 +Mimicry
+
+Bank 0 74 Mu2026 Hybrid - MU2000 bank 0:74
+4 +PhunkyDX
+5 +Turnpik2
+7 +++RobotClv
+16 +Dawn
+17 +LoFiOrgn
+27 +FMChoGtS
+38 TalkPuls
+39 PwrdPuls
+48 +++Str+Brss
+55 Blowout
+56 +++BrlltTp
+61 SfrzdBr2
+80 +FMSlwSwp
+81 +Mod Saw
+98 Ana Bell
+101 +Parasite
+
+Bank 0 75 Mu2026 Hybrid - MU2000 bank 0:75
+4 +Nasal DX
+5 +Cerritos
+16 +Mellorgn
+17 +BeepOrgn
+27 +PeskyGtr
+38 +Node
+39 +PwrPulsB
+48 +++3oct Str
+55 +++Trcrtps
+56 +++Fantare
+61 OctBrass
+80 +SyncLdDb
+81 +Toad
+101 +Cicada
+
+Bank 0 76 Mu2026 Hybrid - MU2000 bank 0:76
+4 +NaslDxDt
+5 +Sunset
+16 +Fuzzorgn
+17 +Belief
+27 +ClaviGtr
+38 +Stainer
+39 +Pwrd Saw
+48 +++5partStr
+61 +++Alps
+80 +Curse
+81 +FatOctav
+101 +Beacon
+
+Bank 0 77 Mu2026 Hybrid - MU2000 bank 0:77
+4 +Din
+5 +Soft DX
+16 +FMO
+17 +SnapOrgn
+38 +StainAtk
+39 +++SmoothBs
+61 +++Symphnc
+80 +OctvBeep
+81 +Overdose
+101 +++GblnTalk
+
+Bank 0 78 Mu2026 Hybrid - MU2000 bank 0:78
+4 +++4 Way EP
+5 +Reso DX
+16 +70sDrOr3
+38 +SweepSqr
+39 +++SynAttck
+61 +++Phoenix
+80 Sine Ld2
+81 +PWMDecay
+101 +++Temple
+
+Bank 0 79 Mu2026 Hybrid - MU2000 bank 0:79
+4 +++Easy EP
+5 +PiercnDX
+16 +++MoodOrgn
+38 +SwpSqr+
+80 SquarLd3
+81 +SawDecay
+
+Bank 0 80 Mu2026 Hybrid - MU2000 bank 0:80
+4 +++Sine EP
+5 +ShvrngDX
+38 +Stinks
+80 SquarLd4
+81 FatSawLd
+
+Bank 0 81 Mu2026 Hybrid - MU2000 bank 0:81
+4 +++Cheap EP
+5 +ShvrnDX+
+38 +StnksRes
+81 DuckLead
+
+Bank 0 82 Mu2026 Hybrid - MU2000 bank 0:82
+5 +RattlnDX
+38 +Reso Sqr
+81 BoostSaw
+
+Bank 0 83 Mu2026 Hybrid - MU2000 bank 0:83
+5 +RatlnDX+
+38 +Dagger
+81 Mr.Saw
+
+Bank 0 84 Mu2026 Hybrid - MU2000 bank 0:84
+5 +TinkerDX
+38 +Zinc
+81 ThinSwLd
+
+Bank 0 85 Mu2026 Hybrid - MU2000 bank 0:85
+5 +TinkrDX+
+38 +SweePWM
+81 MouthSaw
+
+Bank 0 86 Mu2026 Hybrid - MU2000 bank 0:86
+38 +SwPWM St
+81 Dr.Lead2
+
+Bank 0 87 Mu2026 Hybrid - MU2000 bank 0:87
+38 +Slow Wah
+81 Saw Unis
+
+Bank 0 88 Mu2026 Hybrid - MU2000 bank 0:88
+38 +Crook
+81 OctSawLd
+
+Bank 0 89 Mu2026 Hybrid - MU2000 bank 0:89
+38 FstFltBa
+81 Seq Saw1
+
+Bank 0 90 Mu2026 Hybrid - MU2000 bank 0:90
+38 Rubber30
+81 Seq Saw2
+
+Bank 0 91 Mu2026 Hybrid - MU2000 bank 0:91
+38 FstResB2
+81 +++SimplSaw
+
+Bank 0 92 Mu2026 Hybrid - MU2000 bank 0:92
+38 +++MinneaBs
+
+Bank 0 93 Mu2026 Hybrid - MU2000 bank 0:93
+38 +++Miami Bs
+
+Bank 0 94 Mu2026 Hybrid - MU2000 bank 0:94
+38 +++ResoTalk
+
+Bank 0 96 Mu2026 Hybrid - MU2000 bank 0:96
+12 Balafon ***
+14 ChrchBel
+15 Cimbalom
+24 Ukulele
+25 Mandolin
+26 PdlSteel **
+28 Mu.DstGt **
+32 +WalkSyBa
+35 SynFretl
+38 Hammer
+46 +Vln Harp
+53 VoiceHmn **
+56 FluglHrn **
+71 BassClar **
+72 ++Bang Di
+73 ++Qu Di
+75 Kawala **
+81 Seq Ana.
+100 Smokey
+101 BelChoir
+104 Tambra
+105 Rabab
+106 Tsugaru **
+107 Taisho-k
+109 ++Sheng
+110 ++Er Hu
+111 Pungi
+112 Bonang
+113 Atrigane ***
+114 Tablas **
+115 Castanet
+116 Gr.Cassa
+119 RevSnar1 **
+
+Bank 0 97 Mu2026 Hybrid - MU2000 bank 0:97
+12 Balimba
+14 Carillon
+15 Santur
+25 +MndlnEns
+32 +Dim&Cool
+35 SmthFrtl
+46 +VlnHrpDt
+56 +Cornet
+101 Dharma ***
+104 Tamboura
+105 Gopichnt
+107 Kanoon
+110 ++Ban Hu
+111 Hichriki
+112 Altair
+114 GlasPerc
+119 RevSnar2 **
+
+Bank 0 98 Mu2026 Hybrid - MU2000 bank 0:98
+12 Log Drum
+15 ++Yang Qin
+105 Oud
+107 ++Zheng
+110 ++Jing Hu
+111 ++Suo Na
+112 Gamelan
+114 ThaiBell
+119 RevKick1 **
+
+Bank 0 99 Mu2026 Hybrid - MU2000 bank 0:99
+105 ++Pi Pa
+112 S.Gamlan
+119 RevConBD **
+
+Bank 0 100 Mu2026 Hybrid - MU2000 bank 0:100
+112 Rama Cym
+119 Rev Tom1 **
+
+Bank 0 101 Mu2026 Hybrid - MU2000 bank 0:101
+112 AsianBel
+119 Rev Tom2 **
+
+Bank 16 0 Mu2026 Hybrid - MU2000 sampling voices
+0 Voice001
+1 Voice002
+2 Voice003
+3 Voice004
+4 Voice005
+5 Voice006
+6 Voice007
+7 Voice008
+8 Voice009
+9 Voice010
+10 Voice011
+11 Voice012
+12 Voice013
+13 Voice014
+14 Voice015
+15 Voice016
+16 Voice017
+17 Voice018
+18 Voice019
+19 Voice020
+20 Voice021
+21 Voice022
+22 Voice023
+23 Voice024
+24 Voice025
+25 Voice026
+26 Voice027
+27 Voice028
+28 Voice029
+29 Voice030
+30 Voice031
+31 Voice032
+32 Voice033
+33 Voice034
+34 Voice035
+35 Voice036
+36 Voice037
+37 Voice038
+38 Voice039
+39 Voice040
+40 Voice041
+41 Voice042
+42 Voice043
+43 Voice044
+44 Voice045
+45 Voice046
+46 Voice047
+47 Voice048
+48 Voice049
+49 Voice050
+50 Voice051
+51 Voice052
+52 Voice053
+53 Voice054
+54 Voice055
+55 Voice056
+56 Voice057
+57 Voice058
+58 Voice059
+59 Voice060
+60 Voice061
+61 Voice062
+62 Voice063
+63 Voice064
+64 Voice065
+65 Voice066
+66 Voice067
+67 Voice068
+68 Voice069
+69 Voice070
+70 Voice071
+71 Voice072
+72 Voice073
+73 Voice074
+74 Voice075
+75 Voice076
+76 Voice077
+77 Voice078
+78 Voice079
+79 Voice080
+80 Voice081
+81 Voice082
+82 Voice083
+83 Voice084
+84 Voice085
+85 Voice086
+86 Voice087
+87 Voice088
+88 Voice089
+89 Voice090
+90 Voice091
+91 Voice092
+92 Voice093
+93 Voice094
+94 Voice095
+95 Voice096
+96 Voice097
+97 Voice098
+98 Voice099
+99 Voice100
+100 Voice101
+101 Voice102
+102 Voice103
+103 Voice104
+104 Voice105
+105 Voice106
+106 Voice107
+107 Voice108
+108 Voice109
+109 Voice110
+110 Voice111
+111 Voice112
+112 Voice113
+113 Voice114
+114 Voice115
+115 Voice116
+116 Voice117
+117 Voice118
+118 Voice119
+119 Voice120
+120 Voice121
+121 Voice122
+122 Voice123
+123 Voice124
+124 Voice125
+125 Voice126
+126 Voice127
+127 Voice128
+
+Bank 16 1 Mu2026 Hybrid - MU2000 bank 16:1
+0 Voice129
+1 Voice130
+2 Voice131
+3 Voice132
+4 Voice133
+5 Voice134
+6 Voice135
+7 Voice136
+8 Voice137
+9 Voice138
+10 Voice139
+11 Voice140
+12 Voice141
+13 Voice142
+14 Voice143
+15 Voice144
+16 Voice145
+17 Voice146
+18 Voice147
+19 Voice148
+20 Voice149
+21 Voice150
+22 Voice151
+23 Voice152
+24 Voice153
+25 Voice154
+26 Voice155
+27 Voice156
+28 Voice157
+29 Voice158
+30 Voice159
+31 Voice160
+32 Voice161
+33 Voice162
+34 Voice163
+35 Voice164
+36 Voice165
+37 Voice166
+38 Voice167
+39 Voice168
+40 Voice169
+41 Voice170
+42 Voice171
+43 Voice172
+44 Voice173
+45 Voice174
+46 Voice175
+47 Voice176
+48 Voice177
+49 Voice178
+50 Voice179
+51 Voice180
+52 Voice181
+53 Voice182
+54 Voice183
+55 Voice184
+56 Voice185
+57 Voice186
+58 Voice187
+59 Voice188
+60 Voice189
+61 Voice190
+62 Voice191
+63 Voice192
+64 Voice193
+65 Voice194
+66 Voice195
+67 Voice196
+68 Voice197
+69 Voice198
+70 Voice199
+71 Voice200
+72 Voice201
+73 Voice202
+74 Voice203
+75 Voice204
+76 Voice205
+77 Voice206
+78 Voice207
+79 Voice208
+80 Voice209
+81 Voice210
+82 Voice211
+83 Voice212
+84 Voice213
+85 Voice214
+86 Voice215
+87 Voice216
+88 Voice217
+89 Voice218
+90 Voice219
+91 Voice220
+92 Voice221
+93 Voice222
+94 Voice223
+95 Voice224
+96 Voice225
+97 Voice226
+98 Voice227
+99 Voice228
+100 Voice229
+101 Voice230
+102 Voice231
+103 Voice232
+104 Voice233
+105 Voice234
+106 Voice235
+107 Voice236
+108 Voice237
+109 Voice238
+110 Voice239
+111 Voice240
+112 Voice241
+113 Voice242
+114 Voice243
+115 Voice244
+116 Voice245
+117 Voice246
+118 Voice247
+119 Voice248
+120 Voice249
+121 Voice250
+122 Voice251
+123 Voice252
+124 Voice253
+125 Voice254
+126 Voice255
+127 Voice256
+
+Bank 33 0 Mu2026 Hybrid - VL
+0 Mad Tube
+1 VintLead
+2 SpaceZoo
+3 Gtr Hero
+4 StoneHng
+5 Whizzer
+6 SimpleBa
+7 ClavBass
+8 SuperBas
+9 New Slap
+10 RockPigs
+11 Igneous
+12 50/50
+13 Cybastrg
+14 Wynth
+15 Buzz Saw
+16 Zub Zub
+17 BlueLead
+18 OsciLead
+19 SqrLead!
+20 BiggerSy
+21 AnaSquid
+22 SharpSyn
+23 Ana.Wave
+24 Ana.Wurl
+25 Babalog
+26 FngrBas!
+27 UprghtBa
+28 Fnground
+29 Birdland
+30 FlageoBa
+31 DampBass
+32 Fretles!
+33 Fretls!2
+34 ThumBass
+35 RockBass
+36 SmooBass
+37 WarmBass
+38 YamaBass
+39 Box Bass
+40 Bass Cab
+41 FruitBas
+42 AcidBas!
+43 SqrBass!
+44 PlsClav!
+45 MogueBas
+46 BoppaBas
+47 BuzzerBa
+48 MuteHrBa
+49 Tek.Bass
+50 TranzBas
+51 Chamlion
+52 Para.Syn
+53 SteamBas
+54 Boo Bass
+55 WhelkBas
+56 AttakSyn
+57 Q. Klav
+58 Sitar!
+59 India
+60 YamSteel
+61 Stung St
+62 Mu
+63 Waterfon
+64 DinoPerc
+65 Formula
+66 Jurassic
+67 Devil
+68 SpcHorse
+69 Jason
+70 Suedhead
+71 EspaGtr!
+72 JazzGtr!
+73 JazzyGtr
+74 L7 Pluck
+75 WetPluck
+76 Comp.Gtr
+77 FunkyGtr
+78 Thin Gtr
+79 Carlos
+80 Destiny
+81 Gonzo
+82 Grunge
+83 Ossyncro
+84 Talk Box
+85 Sync Ld!
+86 Old Mini
+87 Fat Mini
+88 Parlopho
+89 SimpleSy
+90 Choronic
+91 SlitMinu
+92 SynHarmo
+93 Flaggoot
+94 Syn.Skex
+95 Reso.Sqr
+96 Wurli Ld
+97 FlatLead
+98 PhilTur
+99 ChalPuls
+100 Pluck Ld
+101 Brassyn
+102 AcoSynLd
+103 Moby
+104 Digitron
+105 LyricOff
+106 Rezzawi
+107 Macro
+108 Claribo
+109 Binafone
+110 MokoPipe
+111 Alibaba
+112 Persinet
+113 PicoPipe
+114 Gertrude
+115 Xynth
+116 Duality
+117 Alt Kwek
+118 Softblow
+119 AlbaPipe
+120 Electrum
+121 Edgeopho
+122 BaClari!
+123 WX Clari
+124 WX Oboe
+125 WX JzGtr
+126 Shakuha!
+127 LipClari
+
+Bank 33 1 Mu2026 Hybrid - PVL
+0 Vento
+1 Floboe
+2 Sintax
+3 Eastern
+4 Trumpet!
+5 SprnoSx!
+6 LiteAlto
+7 Trombon!
+8 BtlFlute
+9 Air Sax
+10 TenorSx!
+11 Coca
+12 JetLpBow
+13 Viol Inn
+14 MuteCone
+15 BrethBow
+16 Trumpt!2
+17 FluglHr!
+18 Cornet!
+19 Jazz Trp
+20 JazzTrp2
+21 Flumpet
+22 WXTrumpt
+23 MuteTrp!
+24 MuteTp!2
+25 MelTrmbn
+26 NerzoBrs
+27 FrchHrn!
+28 FrHorn!2
+29 Nu Horne
+30 WX Horn
+31 Tuba!
+32 NuViolin
+33 C Violin
+34 BrtVioln
+35 MutedVln
+36 BrtViola
+37 Vla Outt
+38 Cello!
+39 Eleanor
+40 Nu Cello
+41 Contrair
+42 DoublBow
+43 Piccolo!
+44 Picolo!2
+45 BowPicol
+46 C Flute
+47 C Flute2
+48 JazFlute
+49 OakFlute
+50 BtlFlut2
+51 Rzde.Flt
+52 Flutuen
+53 Nz Flute
+54 WX Shaku
+55 Pan Pipe
+56 PanPicol
+57 Bamboo
+58 Andean
+59 Flurinet
+60 SoftReed
+61 Flurmod
+62 Jhopali
+63 Baroquen
+64 SquealAT
+65 NuSoprSx
+66 CvSoprSx
+67 SoprPipe
+68 LiteSopr
+69 AnaSprno
+70 NuAltoSx
+71 SweetAlt
+72 AltoSax!
+73 HarpAlto
+74 HarpAlt2
+75 GlassAlt
+76 Acid Sax
+77 Wack Sax
+78 NuTenrSx
+79 MildTenr
+80 Jazz Sax
+81 TenorSub
+82 BellMike
+83 GlassTnr
+84 FunkyTnr
+85 OldTenor
+86 BrtTenor
+87 BariSax!
+88 VoxoSaxo
+89 Oboe!
+90 Oboe!2
+91 Noboe
+92 OboeWhi.
+93 DblReedy
+94 TripleRd
+95 EngHorn!
+96 Loboe
+97 Bassoon!
+98 Clrinet!
+99 LitePipe
+100 HyperCla
+101 Clrint!2
+102 IslePipe
+103 Chanter
+104 ThaiReed
+105 Recordr!
+106 Claricrd
+107 SoftPipe
+108 BowedSaw
+109 Ocarina!
+110 Lonely
+111 Ophelia
+112 Maysbe?!
+113 MizuHorn
+114 Pico Str
+115 Sylophon
+116 Bowed Ld
+117 Squeeze
+118 MouthKey
+119 AmpdHarp
+120 CromHarp
+121 WahUpHrp
+122 YamaBotl
+123 Blowsoo
+124 Brappo
+125 CrumBon
+126 Klarina
+127 ReedWin
+
+Bank 35 0 Mu2026 Hybrid - MU2000 bank 35:0
+0 1 BRASS 11
+1 2 BRASS 22
+2 3 BRASS 33
+3 4 STRINGS 14
+4 5 STRINGS 25
+5 6 STRINGS 36
+6 7 ORCHESTR7
+7 8 PIANO 18
+8 9 PIANO 29
+9 10 PIANO 310
+10 11 E.PIANO 111
+11 12 GUITAR 112
+12 13 GUITAR 213
+13 14 SYN-LEA 114
+14 15 BASS 1
+15 16 BASS 2
+16 17 E.ORGAN 1
+17 18 PIPES 1
+18 19 HARPSIC 1
+19 20 CLAV 1
+20 21 VIBE 1
+21 22 MARIMBA
+22 23 KOTO
+23 24 FLUTE 1
+24 25 ORCH-CHI
+25 26 TUB BELL
+26 27 STEEL DR
+27 28 TIMPANI
+28 29 REFS WHI
+29 30 VOICE 1
+30 31 TRAIN
+31 32 TAKE OFF
+32 33 PIANO 4
+33 34 PIANO 5
+34 35 E.PIANO 2
+35 36 E.PIANO 3
+36 37 E.PIANO 4
+37 38 PIANO 5T
+38 39 CELESTE
+39 40 TOY PIAN
+40 41 HARPSCI 2
+41 42 HARPSCI 3
+42 43 CLAV 2
+43 44 CLAV 3
+44 45 E.ORGAN 2
+45 46 E.ORGAN 3
+46 47 E.ORGAN 4
+47 48 E.ORGAN 5
+48 49 PIPES 2
+49 50 PIPES 3
+50 51 PIPES 4
+51 52 CALIOPE
+52 53 ACCORDIO
+53 54 SITAR
+54 55 GUITAR 3
+55 56 GUITAR 4
+56 57 GUITAR 5
+57 58 GUITAR 6
+58 59 LUTE
+59 60 BANJO
+60 61 HARP 1
+61 62 HARP 2
+62 63 BASS 3
+63 64 BASS 4
+
+Bank 48 0 Mu2026 Hybrid - MU2000 bank 48:0
+0 01 +MtdClavi
+1 02 +Orimba
+
+Bank 48 8 Mu2026 Hybrid - MU2000 bank 48:8
+0 +Beeline
+1 +BlineHrd
+2 +Dwarf
+3 +Byte
+4 +Ping
+5 +NastyCut
+6 +NstyCtSt
+7 +Xe
+8 +OrganHit
+9 +OrgnHit+
+10 +Soft Hit
+11 +Vein
+12 +Packet
+13 +Jolly
+14 +Jolly +
+15 +Envy
+16 +EnvyShrt
+17 +Cough
+18 +Remark
+19 +Potala
+20 +Fury
+21 +Glocken+
+
+Bank 48 16 Mu2026 Hybrid - MU2000 bank 48:16
+0 +Rage
+1 +TnglCaos
+2 +Incontnc
+3 +IncntClk
+4 +CheapOsc
+5 +CheapOc+
+6 +NstOrSpl
+7 +SprClick
+8 +Boomout
+9 +ChoirSpl
+10 +Veld
+11 +VaporVox
+12 +VoxShoot
+13 +SemiacOr
+
+Bank 48 24 Mu2026 Hybrid - MU2000 bank 48:24
+0 +Fuss
+1 +VanAllen
+2 +Divinity
+3 +Paranoia
+4 +Vexation
+5 +CalcOrg1
+6 +CalcOrg2
+7 +CalcOrg3
+8 +ChoCalcO
+9 +Sodium
+
+Bank 48 48 Mu2026 Hybrid - MU2000 bank 48:48
+0 +Reflex 1
+1 +Reflex 2
+2 +Prcesion
+3 +RndmWalk
+4 +RandmRun
+
+Bank 48 56 Mu2026 Hybrid - MU2000 bank 48:56
+0 +Insanity
+1 +Habakkuk
+
+Bank 48 64 Mu2026 Hybrid - MU2000 bank 48:64
+0 +DstnFire
+1 +BlowNoiz
+2 +Fall
+3 +Chaff
+
+Bank 48 72 Mu2026 Hybrid - MU2000 bank 48:72
+0 +Litning
+1 +Oof
+2 +Lust
+3 +Lust St
+4 +SoftHit+
+5 +Cough +
+6 +Ruin
+7 +Ruin St
+8 +Vein +
+9 +Universe
+10 +UnvrsSwp
+11 +Xe +
+12 +Daze
+13 +Refusal
+14 +Refusal+
+15 +Lie
+16 +Malice
+17 +Doubt
+18 +DoubtDbl
+
+Bank 48 80 Mu2026 Hybrid - MU2000 bank 48:80
+0 +Zipzap
+
+Bank 48 88 Mu2026 Hybrid - MU2000 bank 48:88
+0 +Escape
+1 +Zigzag
+2 +Scud
+3 +Hinayana
+4 +Boot
+5 +Anathema
+6 +Germ 1
+7 +Germ 2
+8 +Malfnctn
+
+Bank 48 96 Mu2026 Hybrid - MU2000 bank 48:96
+0 +TinKettl
+1 +K/S Anlg
+2 +K/S Humd
+3 +K/S Slap
+4 +Rvr/Crsh
+
+Bank 48 104 Mu2026 Hybrid - MU2000 bank 48:104
+0 +Satya
+1 +Monastry
+2 +Vinaya
+3 +Prana
+4 +Delight
+5 +Puja
+6 +Bent Tom
+
+Bank 48 120 Mu2026 Hybrid - MU2000 bank 48:120
+0 +Vodou
+
+Bank 64 0 Mu2026 Hybrid - MU2000 bank 64:0
+0 CuttngNz
+1 CttngNz2
+2 DstCutNz **
+3 Str Slap
+4 B.Slide **
+5 P.Scrape **
+16 Fl.KClik
+32 Shower
+33 Thunder
+34 Wind
+35 Stream
+36 Bubble
+37 Feed **
+38 +Cave
+48 Dog
+49 Horse
+50 Tweet 2
+51 Kitty **
+52 Growl **
+53 Haunted **
+54 Ghost
+55 Maou **
+56 +Insects
+57 +Bacteria
+64 PhonCall **
+65 DoorSqek
+66 DoorSlam
+67 ScratchC
+68 ScratchS **
+69 WindChim
+70 Telphon2
+71 +++AnthrScr
+72 +++TurnTabl
+80 CarElgnt
+81 CarTSqel
+82 Car Pass
+83 CarCrash
+84 Siren
+85 Train
+86 JetPlane
+87 Starship
+88 Burst
+89 Coaster
+90 Submarin
+91 +Cnectvty
+92 +Mystery
+93 +++Charging
+96 Laugh
+97 Scream
+98 Punch
+99 Heart
+100 Footstep
+101 Applaus2 **
+112 MchinGun
+113 LaserGun
+114 Xplosion
+115 Firework
+116 +Fireball
+
+Bank 67 0 Mu2026 Hybrid - MU2000 bank 67:0
+0 1 Turn Tbl
+16 17 DX-Clave
+17 18 SideStck
+18 19 Snapie
+19 20 Deep Snr
+20 21 SumohDrm
+32 33 DX-Wave
+33 34 Image 3
+48 49 DX-Piyo 1
+49 50 DX-Inct 1
+50 51 DX-Grwl 1
+51 52 DX-Grwl 2
+52 53 Help Me!
+53 54 DX-Wolf
+54 65 DX-Ring 1
+55 56 DX-Inct 2
+65 66 DX-TlCal
+66 67 DX-TlBsy
+67 68 DX-TlTne
+68 69 DX-Ring 2
+69 70 DX-BigBn
+70 71 IronEch 1
+71 72 IronEch 2
+72 73 DX-RvCy 1
+73 74 DX-RvCy 2
+80 81 DX-Hlcpt
+81 82 DX-Train
+82 83 Take Off
+83 84 Mobile 1
+84 85 MotrCycl
+85 86 DX-Ship
+86 87 Closing
+87 88 Scrchers
+88 89 MM-Fall
+89 90 DX-Fight
+90 91 MobyDick
+91 92 OutLimit
+96 97 Paranoir
+97 98 CaGhstLn
+98 99 MM-Shk 2
+99 100 Image 1
+100 101 Image 2
+101 102 Tenjiku
+102 103 Metal
+103 104 Flxatone
+104 105 Spoon
+112 113 WhikShot
+113 114 PercShot
+114 115 Crasher
+115 116 Laser 1
+116 117 Laser 2
+117 118 Laser 3
+118 119 Stopper
+119 120 Wallop 1
+120 121 Wallop 2
+121 122 StreetSD
+122 123 ManEater
+123 124 SmbaWhsl
+124 125 Refs Whsl
+125 126 Triangl 1
+126 127 Triangl 2
+127 128 SlighBel
+
+Bank 80 0 Mu2026 Hybrid - MU2000 bank 80:0
+0 Grand Piano Stereo
+1 Bright Piano
+2 CP
+3 Honky Tonk 1
+4 Tea
+5 Full Tine
+6 Harpsichord 1
+7 Clavinet 1
+
+Bank 80 64 Mu2026 Hybrid - MU2000 bank 80:64
+0 Grand Piano Mono
+1 Digital
+2 CP Symph
+3 Honky Tonk 2
+4 Deodar
+5 DX EP2
+6 Harpsichord 2
+7 Clavinet 2
+
+Bank 80 65 Mu2026 Hybrid - MU2000 bank 80:65
+0 Bright Grand
+1 Chorus Digital
+2 Tremolo CP
+3 Honky Tonk 3
+4 70's EP
+5 DX 1980
+6 Harpsichord 3
+7 Mute Clavinet
+
+Bank 80 66 Mu2026 Hybrid - MU2000 bank 80:66
+0 60's Grand
+1 Grand + EP
+2 Bright CP
+3 FM Honkytonk
+4 80's EP
+5 DX 1990
+6 Harpsichord 4
+7 Phased Clavinet 1
+
+Bank 80 67 Mu2026 Hybrid - MU2000 bank 80:67
+0 Rich Grand Stereo
+1 Digital Grand
+2 Digital CP 1
+4 Crisp CP
+5 Mellow DX
+6 Rich Harpsichord
+7 Phased Clavinet 2
+
+Bank 80 68 Mu2026 Hybrid - MU2000 bank 80:68
+0 Rich Grand Mono
+1 Grand w/DX
+2 Jino
+4 Sweetness
+5 Chorus Tine
+6 Sharp Harpsichord
+7 Wah Clavinet
+
+Bank 80 69 Mu2026 Hybrid - MU2000 bank 80:69
+0 60's Jazz Piano
+1 Chorus Digital Piano
+2 Digital CP 2
+4 Freeway
+5 Chorus EP2
+7 Digital Clavinet
+
+Bank 80 70 Mu2026 Hybrid - MU2000 bank 80:70
+0 Tight Grand Stereo
+1 Glass Piano
+2 Petit CP
+4 Tremolo 70
+5 Chorus 1980
+7 Chorus Digital Clavinet
+
+Bank 80 71 Mu2026 Hybrid - MU2000 bank 80:71
+0 Tight Grand Mono
+1 Digital Tine
+4 Remark
+5 Chorus 1990
+7 Phase Digital Clavinet
+
+Bank 80 72 Mu2026 Hybrid - MU2000 bank 80:72
+0 Power Grand
+1 Saw Digital 1
+4 Sample
+5 Dark DX EP
+
+Bank 80 73 Mu2026 Hybrid - MU2000 bank 80:73
+0 Mild Grand
+1 Saw Digital 2
+4 Mid 70's
+5 FT Ballad
+
+Bank 80 74 Mu2026 Hybrid - MU2000 bank 80:74
+0 Timeworn
+4 Celeste 80
+5 Sym EP2
+
+Bank 80 75 Mu2026 Hybrid - MU2000 bank 80:75
+0 Chorus Mono
+4 At Once
+5 Chorus 1982
+
+Bank 80 76 Mu2026 Hybrid - MU2000 bank 80:76
+0 Doom
+4 Tremolo Dyno
+5 90's Ballad
+
+Bank 80 77 Mu2026 Hybrid - MU2000 bank 80:77
+0 Phono
+4 Tremolo Wurlitzer
+5 816
+
+Bank 80 78 Mu2026 Hybrid - MU2000 bank 80:78
+0 Room
+4 Phase 70
+5 DX EP +Pad
+
+Bank 80 79 Mu2026 Hybrid - MU2000 bank 80:79
+0 Ambient Grand
+4 Delayed Dyno
+5 DX Synth Str
+
+Bank 80 80 Mu2026 Hybrid - MU2000 bank 80:80
+0 Flanger Grand
+4 Flanger Dyno
+5 DX EP +Chorus
+
+Bank 80 81 Mu2026 Hybrid - MU2000 bank 80:81
+0 Celeste Grand
+4 Distorted 70
+5 Balmy DX
+
+Bank 80 82 Mu2026 Hybrid - MU2000 bank 80:82
+0 Double Piano
+4 Dyno 81
+5 Glassy EP
+
+Bank 80 83 Mu2026 Hybrid - MU2000 bank 80:83
+0 Montuno
+4 Tonight
+5 FM Piano
+
+Bank 80 84 Mu2026 Hybrid - MU2000 bank 80:84
+0 Grand Dyno
+4 Dyno 83
+5 Chorus FMP1
+
+Bank 80 85 Mu2026 Hybrid - MU2000 bank 80:85
+0 David
+4 Double 70's
+
+Bank 80 86 Mu2026 Hybrid - MU2000 bank 80:86
+0 Rhody Grand
+4 Digital Rhodes
+
+Bank 80 87 Mu2026 Hybrid - MU2000 bank 80:87
+0 Perc Piano
+4 Choir EP
+
+Bank 80 88 Mu2026 Hybrid - MU2000 bank 80:88
+0 Grand DX 1
+4 Paddy EP
+
+Bank 80 89 Mu2026 Hybrid - MU2000 bank 80:89
+0 Grand DX 2
+4 Voice Pad EP
+
+Bank 80 90 Mu2026 Hybrid - MU2000 bank 80:90
+0 Bob
+4 Vibrato EP
+
+Bank 80 91 Mu2026 Hybrid - MU2000 bank 80:91
+0 Piano Str
+4 60's EP
+
+Bank 80 92 Mu2026 Hybrid - MU2000 bank 80:92
+0 Piano St Pad
+4 Trump
+
+Bank 80 93 Mu2026 Hybrid - MU2000 bank 80:93
+0 Synth Str Pf
+4 Donny Wurlitzer
+
+Bank 80 94 Mu2026 Hybrid - MU2000 bank 80:94
+0 Piano Pad
+4 Wurlitzer Amp
+
+Bank 80 95 Mu2026 Hybrid - MU2000 bank 80:95
+0 Oct Pf + Pad
+
+Bank 80 96 Mu2026 Hybrid - MU2000 bank 80:96
+0 Pf + Choir
+
+Bank 80 97 Mu2026 Hybrid - MU2000 bank 80:97
+0 Mod Pad Pf
+
+Bank 80 98 Mu2026 Hybrid - MU2000 bank 80:98
+0 Pia-Tron
+
+Bank 80 99 Mu2026 Hybrid - MU2000 bank 80:99
+0 Sitary Pf
+
+Bank 80 100 Mu2026 Hybrid - MU2000 bank 80:100
+0 St Grand P Stereo
+
+Bank 80 101 Mu2026 Hybrid - MU2000 bank 80:101
+0 St Grand P Mono
+
+Bank 80 102 Mu2026 Hybrid - MU2000 bank 80:102
+0 St Rich Stereo
+
+Bank 80 103 Mu2026 Hybrid - MU2000 bank 80:103
+0 St Rich Mono
+
+Bank 80 104 Mu2026 Hybrid - MU2000 bank 80:104
+0 St Tight Stereo
+
+Bank 80 105 Mu2026 Hybrid - MU2000 bank 80:105
+0 St Tight Mono
+
+Bank 83 0 Mu2026 Hybrid - MU2000 bank 83:0
+0 1 FrtePno1
+1 2 BritPno1
+2 3 DXCP-70
+3 4 DX-Rgtim
+4 5 DX-Road 1
+5 6 E.Pno 1
+6 7 Harpsi 1
+7 8 MM-Clav1
+8 9 Celesta 1
+9 10 Glocken 1
+10 11 MusicBx1
+11 12 DX-Vibe 1
+12 13 DX-Mrmb 1
+13 14 DX-Xylo 1
+14 15 Carillion
+15 16 DX-Dlcm1
+16 17 FullOrn
+17 18 PrcOrg 1
+18 19 RckOrg 1
+19 20 DXChrch 1
+20 21 PufOrgn 1
+21 22 DX-Acrd 1
+22 23 DX-Hmnc 1
+23 24 DX-TngAc
+24 25 DX-AcGt 1
+25 26 DX-PkGt 1
+26 27 DX-JzGt 1
+27 28 DX-ClGt 1
+28 29 DX-MtGt 1
+29 30 DX-ODGt 1
+30 31 Fuzz Gtr
+32 33 DX-WdBa 1
+33 34 DX-FgBa 1
+34 35 DX-PkBa 1
+35 36 FrtlsBa 1
+36 37 RundWund
+37 38 DigiBas 1
+38 39 DX-SyBa1
+39 40 DX-Bass 1
+40 41 DX-Vin 1
+41 42 DX-Vla 1
+42 43 DX-Celo 1
+45 46 DX-Pizz 1
+46 47 LuteHarp
+47 48 DX-Tmpni
+48 49 Mid Str 1
+49 50 WarmStr 1
+50 51 DX-SySt 1
+51 52 DX-SySt 6
+52 53 DX-Cho 1
+54 55 DX-Cho 6
+56 57 DX-Trpt 1
+57 58 DX-Trb 1
+58 59 DX-Tuba 1
+60 61 DX-Horn
+61 62 DX-BrSc 1
+62 63 CS80-Br 1
+63 64 ChorsBrs
+64 65 SprnoSax
+65 66 Alto Sax
+66 67 TenorSax
+68 69 Oboe 1
+69 70 Eng.Horn
+70 71 Bassoon
+71 72 VbrtClar
+72 73 Piccolo 1
+73 74 DX-Flt 1
+74 75 Recordr 1
+75 76 DX-PnFl 1
+76 77 Fuhppps!
+78 79 Whistle 1
+79 80 DX-Ocrn 1
+80 81 DX-Squar
+81 82 DXSyLd 1
+82 83 CalliopL 1
+83 84 BrsLead 1
+84 85 Au Campo
+85 86 DX-VceLd
+86 87 Fifths 1
+87 88 LeadLine
+88 89 HyperSqr
+89 90 Film Pad
+90 91 BritePad
+91 92 DX-ChPd 1
+92 93 BowPad 1
+93 94 DX-MtPd 1
+94 95 GrngePad
+95 96 SweepPd 1
+97 98 FluvPush
+98 99 MtalGlkn
+99 100 PrdsGlok
+100 101 DX-Brit 1
+101 102 Fmilters
+102 103 WaterLog
+103 104 DX-ScFi 1
+104 105 DX-Sitr 1
+105 106 DX-Banjo
+106 107 Shamisn 1
+107 108 DX-Koto
+108 109 DX-Klmb 1
+109 110 DX-BgPip
+110 111 DX-Fidle
+111 112 ScchTone
+112 113 HandBel 1
+113 114 DX-Aggo 1
+114 115 StlDrum 1
+115 116 Block
+116 117 Janpany
+118 119 MM-SDr 1
+
+Bank 83 64 Mu2026 Hybrid - MU2000 bank 83:64
+0 1 FrtePno 1
+1 2 BritPno 1
+2 3 El.Gnd 1
+3 4 ToyPno 1
+4 5 BigWurlt
+5 6 ClrE.Pno
+6 7 Cembalim
+7 8 MM-Clav 2
+8 9 Celesta 2
+9 10 Glocken 2
+11 12 MM-Vibe 1
+12 13 BritMrmb
+13 14 DX-Xylo 2
+14 15 DX-Bel 1
+16 17 DrwOrg 1
+17 18 PrcOrg 2
+18 19 RckOrg 2
+19 20 PipeOrg 1
+20 21 SoftRdOr
+21 22 DX-Acrd 2
+22 23 DX-Hmnc 2
+24 25 DX-AcGt 2
+25 26 DX-PkGt 2
+26 27 DX-JzGt2
+27 28 DX-ClGt 2
+28 29 DX-MtGt2
+30 31 DX-DsGt 1
+32 33 DX-WdBa 2
+33 34 DX-FgBa 2
+34 35 PickPluk
+35 36 FrtlsBa 2
+36 37 SlapStrg
+37 38 SuprBas 1
+38 39 DX-SyBa2
+39 40 Remark
+40 41 DX-Vin 2
+41 42 DX-Vla 2
+42 43 Rosin
+45 46 Pizz Str
+46 47 Syn Harp
+48 49 Mid Str 2
+49 50 Low Str 1
+50 51 Anna Str
+51 52 DX-SySt 7
+52 53 DX-Cho 2
+54 55 DX-Cho 7
+56 57 DX-Trpt 2
+57 58 DX-Trb 2
+58 59 DX-Tuba 2
+60 61 MelwHrn 1
+61 62 DX-BrSc 2
+62 63 CS80-Br 2
+63 64 SyntiBrs
+66 67 DX-Tsax
+68 69 Oboe 2
+71 72 SlowClar
+72 73 Piccolo 2
+73 74 DX-Flt 2
+74 75 Recordr 2
+75 76 Forest 99
+76 77 DX-Botle
+79 80 DX-Ocrn 2
+80 81 DX-SLd 1
+81 82 DXSyLd 2
+82 83 CaliopL 2
+83 84 DX-WahLd
+84 85 LeadPhon
+85 86 Giovanni
+86 87 Fifths 2
+87 88 BassLead
+88 89 Cho+Mrmb
+89 90 DX-SawPd
+90 91 SyBr Pd 1
+91 92 Anna Pad
+92 93 BowPad 2
+93 94 InitEnsm
+94 95 StacHevn
+95 96 Evlution
+98 99 BellPluk
+99 100 Brassy
+100 101 DX-Brit 2
+103 104 DX-ScFi 2
+104 105 DX-Sitr 2
+106 107 Shamisn 2
+107 108 Koto+Flt
+108 109 DX-Klmb 2
+112 113 HandBel 2
+113 114 DX-Aggo 2
+114 115 StlDrum 2
+116 117 SoftHead
+118 119 MM-SDr 2
+
+Bank 83 65 Mu2026 Hybrid - MU2000 bank 83:65
+0 1 MM-Pno 1
+1 2 BritPno 3
+2 3 El.Gnd 2
+3 4 ToyPno 2
+4 5 WurliEP 1
+5 6 E.Pno 2
+6 7 AD1600s 1
+7 8 SkltnClv
+8 9 Celesta 3
+9 10 Glocken 3
+11 12 DX-Vibe 2
+12 13 DX-Mrmb 2
+14 15 MM-Bell
+16 17 DrwOrg 2
+17 18 PrcOrg 3
+18 19 RckOrg 3
+19 20 PipeOrg 2
+20 21 PufOrgn 2
+21 22 DX-Acrd 3
+22 23 BuzzHarp
+24 25 DX-AcGt 3
+25 26 DX-PkGt 3
+26 27 DX-JzGt 3
+27 28 DX-ClGt 3
+28 29 DX-MtGt 3
+30 31 DX-DsGt 2
+32 33 DX-WdBa 3
+33 34 HarmBass
+34 35 ChifBass
+35 36 FrtlsBa 3
+36 37 LiteSlap
+37 38 DrhtBass
+38 39 DX-SyBa 3
+39 40 DX-Bass 2
+40 41 DX-Vin 3
+42 43 DX-Celo 2
+46 47 OrchHarp
+48 49 Brit Str
+49 50 Low Str 2
+50 51 SmalSect
+51 52 DX-AnSt 3
+52 53 DX-Cho 3
+54 55 DX-Cho 8
+56 57 DX-Trpt 3
+57 58 Mute Trb
+60 61 MelwHrn 2
+61 62 5th Brss
+62 63 DX-SBr 1
+63 64 DX-SBr 7
+68 69 Oboe 3
+71 72 DX-Clar 1
+73 74 DX-Flt 3
+74 75 Recordr 3
+75 76 Harvest
+76 77 Quena
+79 80 DX-Ocrn 3
+80 81 DX-SLd 2
+81 82 DXSyLd 3
+82 83 PuffPipe
+83 84 BrsLead 2
+84 85 SweepLd
+85 86 SnglLine
+87 88 EadgbeLd
+88 89 IceHeven
+89 90 ElecComb
+90 91 SyBr Pd 2
+91 92 Whisper 1
+92 93 BowPad 3
+93 94 MtlSweep
+95 96 Phasers
+98 99 MtalDlcm
+99 100 Eletric
+100 101 SynBrite
+103 104 Baroque
+104 105 JuceHarp
+106 107 Shamisn 3
+108 109 DX-Klmb 3
+112 113 TrcrBell
+114 115 Jamaica
+118 119 Tom Herz
+
+Bank 83 66 Mu2026 Hybrid - MU2000 bank 83:66
+0 1 Digi Pno
+1 2 5th Pno 1
+2 3 El.Gnd 3
+3 4 ToyPno 3
+4 5 EP 1980
+5 6 Urban
+6 7 AD1600s 2
+7 8 ClavSf 1
+9 10 Glocken 4
+11 12 DX-Vibe 3
+12 13 DX-Mrmb 3
+14 15 MiniBell
+16 17 DrwOrg 3
+17 18 DxJazOr 1
+18 19 RckOrg 4
+19 20 DXChrch 2
+20 21 StretOrg
+21 22 DX-Acrd 4
+22 23 Fm-Hmnc 1
+24 25 DX-AcGt 4
+25 26 DX-PkGt 4
+26 27 DX-JzGt 4
+27 28 DX-ClGt 4
+28 29 DX-MtGt 4
+30 31 DX-DsGt 3
+32 33 SmohBass
+33 34 NstyBass
+34 35 Plktrmbs
+35 36 FrtlsBa 4
+36 37 ImpctBas
+37 38 Brainacs
+38 39 Cutmandu
+39 40 DX-Bass 3
+42 43 DX-Celo 3
+46 47 Harp+Flt
+48 49 DX-Str 1
+49 50 DX-Str 10
+50 51 Michelle
+51 52 MM-Str 1
+52 53 DX-Cho 4
+54 55 MM-Vce 1
+56 57 DX-Trpt 4
+60 61 MletHorn
+61 62 TightBr 1
+62 63 DX-SBr 2
+63 64 SamplBrs
+71 72 DX-Clar 2
+73 74 DX-Flt 4
+80 81 LyleLead
+81 82 Super DX
+82 83 CaliopL 3
+83 84 BrsLead 3
+84 85 LdSbHarm
+87 88 DX-Ba+Ld
+88 89 MM-Prety
+89 90 Fl.Cloud
+90 91 SyBr Pd 3
+92 93 Ethereal
+93 94 Gior Pad
+95 96 FM-Grwth
+98 99 MetalBox
+99 100 DX-Atms 1
+103 104 DX-ScFi 3
+104 105 Xanu
+114 115 SteelCan
+
+Bank 83 67 Mu2026 Hybrid - MU2000 bank 83:67
+2 3 MM-EGnd 3
+3 4 ToyPno 4
+4 5 DX-Road 2
+5 6 E.Pno 3
+6 7 Harpsi 2
+7 8 Revinett
+11 12 DX-Vibe 4
+12 13 MtalMrmb
+14 15 DX-Bel 2
+16 17 JazOrg 1
+17 18 PrcOrg 4
+18 19 RckOrg 5
+19 20 PipeOrg 3
+21 22 DX-Acrd 5
+22 23 Fm-Hmnc 2
+24 25 Lute Gtr
+25 26 DX-PkGt 5
+27 28 DX-ClGt 5
+28 29 HevyGage
+30 31 DX-DsGt 4
+32 33 After 88
+33 34 FustBass
+34 35 Owl Bass
+35 36 FrtlsBa 5
+36 37 Afresh
+37 38 DigiBas 2
+38 39 DX-SyBa 4
+39 40 Hop Bass
+48 49 DX-Str 2
+49 50 DX-Str 11
+50 51 DX-SySt 2
+51 52 WarmStr 3
+52 53 DX-Cho 5
+54 55 MM-Vce 2
+56 57 SlvTrmpt
+60 61 BlnchHrn
+61 62 TightBr 2
+62 63 DX-SBr 3
+63 64 SinglBrs
+73 74 DX-Flt 5
+80 81 DX-Sld 3
+81 82 DXSyLd 4
+83 84 DXAtkLd
+87 88 FrtlsLd
+88 89 TngVoice
+89 90 Floating
+90 91 SyBr Pd 4
+92 93 Glassy
+99 100 DX-Atms 2
+103 104 DX-Stars
+104 105 EthrFour
+
+Bank 83 68 Mu2026 Hybrid - MU2000 bank 83:68
+2 3 MM-EGnd 2
+3 4 PrprdPno
+4 5 DX-Road 3
+5 6 Vics EP
+6 7 Harpsi 3
+7 8 Clavecn 1
+11 12 BellVibe
+14 15 DX-Bel 3
+16 17 Farf Out
+17 18 PrcOrg 5
+18 19 RckOrg 6
+19 20 PipeOrg 4
+24 25 DX-AcGt 5
+25 26 DX-PkGt 6
+27 28 DX-ClGt 6
+30 31 DX-DsGt 5
+32 33 DX-WdBa 4
+33 34 ClavBass
+34 35 MtalBass
+38 39 BassNovo
+39 40 Excite
+48 49 DX-Str 3
+49 50 DX-Str 12
+50 51 DX-SySt 3
+51 52 WarmStr 4
+54 55 MM-Vce 3
+60 61 AlpsHorn
+61 62 BlowBrss
+62 63 DX-SBr 4
+63 64 ThickBrs
+73 74 DX-Flt 6
+80 81 DX-Sld 4
+81 82 DXSyLd 5
+88 89 Str Tine
+89 90 BrsyWarm
+90 91 SyBr Pd 5
+92 93 GlssHarp
+
+Bank 83 69 Mu2026 Hybrid - MU2000 bank 83:69
+2 3 DigiPoly
+3 4 Bell Pno
+4 5 Old Jazz
+5 6 E.Pno 4
+6 7 Harpsi 4
+7 8 E.P/Clav
+11 12 LFO Vibe
+14 15 DX-Bel 4
+16 17 DrwOrg 4
+17 18 PrcOrg 6
+18 19 RckOrg 7
+19 20 PipeOrg 5
+24 25 Mrmb Gtr
+25 26 DX-PkGt 7
+27 28 DX-ClGt 7
+32 33 DX-WdBa 5
+33 34 DX-FgBa 3
+34 35 WireBass
+38 39 DX-SyBa5
+39 40 DX-Bass4
+48 49 DX-Str 4
+49 50 DX-Str 13
+50 51 DX-SySt 4
+51 52 HalOrch 1
+54 55 Dbvoxfem
+60 61 VibraHrn
+61 62 BrssSect
+62 63 DX-SBr 5
+63 64 XyloBrss
+73 74 DX-Flt 7
+80 81 DX-Sld 5
+81 82 DXSyLd 6
+89 90 WhstlPad
+90 91 SyBr Pd 6
+92 93 Ice Glxy
+
+Bank 83 70 Mu2026 Hybrid - MU2000 bank 83:70
+2 3 Mark III
+3 4 Andrian
+4 5 Knock EP
+5 6 E.Pno 5
+6 7 Caffeine
+7 8 DX-Clv 1
+11 12 Vibetron
+14 15 DX-Bel 5
+16 17 DrwOrg 5
+17 18 PrcOrg 7
+18 19 RckOrg 8
+25 26 Tite Gtr
+27 28 DX-ClGt 8
+33 34 Inoranc
+38 39 DX-SyBa 6
+48 49 DX-Str 5
+50 51 DX-AnSt 1
+51 52 HalOrch 2
+54 55 Lady Vox
+61 62 WarmBrss
+62 63 DX-SBr 6
+63 64 OrchBrss
+73 74 MtalFlut
+80 81 DX-Sld 6
+81 82 DXSyLd 7
+90 91 SyBr Pd 7
+92 93 SpceTrip
+
+Bank 83 71 Mu2026 Hybrid - MU2000 bank 83:71
+2 3 RatioDob
+3 4 SftEPno 1
+4 5 EP 1970
+5 6 FulTine 1
+6 7 HarpsiWr
+7 8 ClavComp
+14 15 DX-Bel 6
+16 17 DrwOrg 6
+17 18 PrcOrg 8
+18 19 RckOrg 9
+25 26 Gtr Box
+38 39 DX-SyBa 7
+48 49 DX-Str 6
+50 51 DX-AnSt 2
+51 52 Maxi Str
+54 55 Space Vox
+61 62 Horn Ens
+62 63 MM-Brss 1
+63 64 Ensemble
+73 74 AirBlowr
+81 82 Vibratrn
+90 91 ClaviPad
+
+Bank 83 72 Mu2026 Hybrid - MU2000 bank 83:72
+3 4 SftEPno 2
+4 5 DX-Road 4
+5 6 Duke EP
+6 7 Harpsi 5
+7 8 DX-Clv 2
+14 15 TmplBel 1
+16 17 DrwOrg 7
+17 18 PrcOrg 9
+18 19 RckOrg 10
+25 26 Long Nail
+38 39 DX-SyBa 8
+48 49 DX-Str 7
+50 51 AgateMs
+51 52 SilkHall
+54 55 Syn Vox
+61 62 Fanfare
+62 63 MM-Brss 2
+63 64 Kingdom
+81 82 DXSyLd 8
+90 91 Dspo Pad
+
+Bank 83 73 Mu2026 Hybrid - MU2000 bank 83:73
+3 4 GlockPno
+4 5 PrcEpno 1
+5 6 E.Pno 6
+7 8 DX-Clv 3
+14 15 TmplBel 2
+16 17 DrwOrg 8
+17 18 PrcOrg 10
+18 19 RckOrg 11
+25 26 Firenze
+48 49 DX-Str 8
+50 51 SolinePf
+51 52 Aftrnoon
+62 63 MM-Brss 3
+81 82 Winwood
+90 91 FnerThng
+
+Bank 83 74 Mu2026 Hybrid - MU2000 bank 83:74
+4 5 ModEpno 1
+5 6 E.Pno 7
+7 8 ClavExcl
+14 15 TmplBel 3
+16 17 DrwOrg 9
+17 18 PrcOrg 11
+18 19 RckOrg 12
+25 26 Folknik
+50 51 Soft Bow
+51 52 ST.Machn
+62 63 Funkrhyt
+90 91 MnstrPad
+
+Bank 83 75 Mu2026 Hybrid - MU2000 bank 83:75
+5 6 FulTine 2
+7 8 BritClv 1
+16 17 DrwOrg 10
+17 18 PrcOrg 12
+18 19 SynOrg 2
+25 26 RytmPulk
+50 51 GntiMind
+51 52 MoterDrv
+62 63 PowerDrv
+90 91 WhaserPd
+
+Bank 83 76 Mu2026 Hybrid - MU2000 bank 83:76
+5 6 E.Pno 8
+7 8 BritClv 2
+16 17 DrwOrg 11
+17 18 PrcOrg 13
+50 51 Gypsy
+62 63 RhalBrss
+90 91 BackSuir
+
+Bank 83 77 Mu2026 Hybrid - MU2000 bank 83:77
+5 6 E.Pno 9
+7 8 DX-Clv 4
+16 17 DrwOrg 12
+17 18 PrcOrg 14
+62 63 UlaDrv
+90 91 PsrSweep
+
+Bank 83 78 Mu2026 Hybrid - MU2000 bank 83:78
+5 6 E.Pno 10
+7 8 DX-Clv 5
+17 18 SynOrg 1
+62 63 Ana Poly
+
+Bank 83 96 Mu2026 Hybrid - MU2000 bank 83:96
+0 1 MM-Pno 2
+1 2 PowerPno
+2 3 El.Gnd 4
+4 5 Soft EP 1
+5 6 DynoRoad
+6 7 Harpsi 6
+7 8 MM-Clav 3
+8 9 Celesta 4
+9 10 Glocken 5
+10 11 MusicBx 2
+11 12 MM-Vibe 2
+12 13 DX-Mrmb 4
+13 14 DX-Xylo 3
+14 15 DX-Bel 7
+15 16 SilkRoad
+16 17 DrwOrg 13
+17 18 PrcOrg 15
+18 19 RckOrg 13
+19 20 PipeOrg 6
+20 21 LateDown
+21 22 DX-Acrd 6
+22 23 DX-Hmnc 3
+25 26 DX-PkGt 8
+26 27 DX-JzGt 5
+27 28 DX-ClGt 9
+30 31 DetDsGt 1
+32 33 DX-WdBa 6
+33 34 SkwkBass
+34 35 DX-PkBa 2
+35 36 DetFlBa 1
+36 37 WireStrg
+37 38 SuprBas 2
+38 39 DX-SyBa 9
+39 40 DX-Bass 5
+40 41 DX-Vin 4
+41 42 DX-Vla 3
+42 43 DX-Celo 4
+46 47 DX-Harp 1
+48 49 DX-Str 9
+49 50 WarmStr 2
+50 51 DX-SySt 5
+51 52 Det.Str 2
+52 53 DX-Vce 1
+54 55 MM-Vce 4
+56 57 Solo Tp
+57 58 DX-Trb 3
+60 61 SimplHrn
+61 62 HardBrss
+62 63 AnaFatBr
+63 64 SynHorns
+65 66 DX-ASax 1
+71 72 DX-Clar 3
+73 74 Song Flt
+75 76 DX-PnFl 2
+78 79 Sukiyaki
+80 81 DX-SLd 7
+81 82 ReedLead
+83 84 DX-BrLd
+88 89 MpndgDom
+91 92 Cho Elms
+92 93 Dstrcted
+93 94 Mystrian
+97 98 BirdView
+98 99 ChiLight
+99 100 DX-HpSt 1
+100 101 BellStr 1
+101 102 DX-Bl+Ch
+102 103 Fntasynt
+104 105 Zimbalon
+108 109 DX-Klmb 4
+112 113 Twincle
+113 114 Cowbell
+114 115 DX-StDr 1
+115 116 Log Drum
+116 117 CongaDrm
+118 119 DX-MtSnr
+
+Bank 83 97 Mu2026 Hybrid - MU2000 bank 83:97
+0 1 Dark Pno
+1 2 5th Pno 2
+4 5 Hard EP 1
+5 6 Prds Pno
+6 7 Harpsi 7
+7 8 DX-Clav 6
+8 9 Hallowen
+9 10 Glocken 6
+10 11 MusicBx 3
+12 13 DX-Mrmb 5
+13 14 DX-Xylo 4
+14 15 DX-Bel 8
+15 16 Frzntime
+16 17 DrwOrg 14
+17 18 PrcOrg 16
+18 19 RckOrg 14
+19 20 PipeOrg 7
+20 21 X-ReedOg
+22 23 DX-Hmnc 4
+25 26 Stlypika
+27 28 DX-ClGt 10
+30 31 DetDsGt 2
+32 33 DX-WdBa 7
+33 34 DX-FgBa 4
+34 35 DX-PkBa 3
+38 39 BassRsWp
+39 40 DX-Bass 6
+46 47 DX-Harp 2
+50 51 Violtron
+51 52 Det.Str 3
+52 53 DX-Vce 2
+62 63 AnalogBr
+63 64 EP+Brs 1
+65 66 DX-Asax 2
+78 79 Whistle 2
+80 81 DX-SLd 8
+81 82 ArrowxMs
+83 84 DX-SwLd 1
+88 89 EP Pad
+91 92 DX-ChPd 2
+93 94 DX-MtPd 2
+97 98 Sanctus
+99 100 IceRvEco
+100 101 BellStr 2
+102 103 RprtRise
+104 105 Xango
+114 115 DX-StDr 2
+116 117 DX-Perc 1
+
+Bank 83 98 Mu2026 Hybrid - MU2000 bank 83:98
+0 1 Pno+Flt
+4 5 Hard EP 2
+5 6 Brit EP
+6 7 Harpsi 8
+7 8 DX-Clav 7
+8 9 MM-Clsta
+9 10 Bali
+10 11 MusicBx 4
+12 13 DX-Mrmb 6
+13 14 DX-Xylo 5
+14 15 DX-Bel 9
+15 16 DX-Dlcm 2
+16 17 DrwOrg 15
+17 18 PrcOrg 17
+18 19 RckOrg 15
+19 20 PipeOrg 8
+25 26 DelClGt 1
+27 28 DX-ClGt 11
+32 33 BogiBass
+33 34 FngaPcka
+34 35 DX-PkBa 4
+38 39 DetSyBa 1
+39 40 DiscBass
+46 47 DX-Harp 3
+50 51 General
+51 52 Det.Str 4
+62 63 DX-FatBr
+63 64 EP+Brs 2
+78 79 Whistle 3
+80 81 DX-SLd 9
+81 82 Att.Lead
+83 84 DX-SwLd 2
+91 92 AngelEvo
+97 98 Glastine
+99 100 DX-HpSt 2
+102 103 Aura
+104 105 India
+114 115 DX-StCn 1
+116 117 Nou
+
+Bank 83 99 Mu2026 Hybrid - MU2000 bank 83:99
+4 5 Hard EP 3
+5 6 Det.EP 4
+6 7 Harpsi 9
+7 8 MuteClav
+9 10 WrapRund
+10 11 MusicBx 5
+12 13 DX-Mrmb 7
+13 14 DX-Xylo 6
+14 15 DX-Bel 10
+16 17 Grinder
+19 20 BritOrgn
+25 26 DelClGt 2
+32 33 BassLgnd
+33 34 HardFngr
+34 35 CompedEB
+39 40 PercBass
+46 47 Apollon
+50 51 OchChime
+51 52 Det.Str 5
+62 63 SyPdBrss
+78 79 CsmWhist
+81 82 DXSyLd 9
+83 84 DX-SwLd 3
+91 92 DX-ChPd 3
+102 103 MM-Shk 1
+104 105 Pilgrim
+114 115 Glaeser
+116 117 DX-Bongo
+
+Bank 83 100 Mu2026 Hybrid - MU2000 bank 83:100
+4 5 Hard EP 4
+5 6 Det.EP 5
+6 7 AD1900s 1
+7 8 ChrsClav
+9 10 HamerGlk
+10 11 MusicBx 6
+12 13 EchoMlt 1
+13 14 DigiXylo
+14 15 DX-Bel 11
+16 17 DrwOrg 16
+19 20 TamePipe
+34 35 BassMgic
+39 40 EzAction
+46 47 HarpStrm
+50 51 EP + Str
+62 63 LyerBrs 1
+83 84 SoftLd 1
+91 92 DX-ChPd 4
+102 103 New Elms
+104 105 Kinzoku 1
+114 115 LigtYear
+
+Bank 83 101 Mu2026 Hybrid - MU2000 bank 83:101
+4 5 CosaRosa
+5 6 Det.EP 6
+7 8 BasoClav
+9 10 PppThing
+10 11 MusicBx 7
+12 13 EchoMlt 2
+14 15 DX-Bel 12
+16 17 DrwOrg 17
+34 35 DetPkBa 1
+39 40 DetDXBa 1
+46 47 CmbaHarp
+50 51 Det.Str 1
+62 63 LyerBrs 2
+102 103 Chi-S&H 1
+104 105 Kinzoku 2
+
+Bank 83 102 Mu2026 Hybrid - MU2000 bank 83:102
+4 5 EP 1985
+5 6 Det.EP 7
+7 8 Det.Clav
+9 10 Syn.Glok
+10 11 MusicBx 8
+12 13 EchoMlt 3
+14 15 TmplBel 4
+16 17 DrwOrg 18
+34 35 DetPkBa 2
+50 51 Str&Brs
+102 103 DX-Echo 1
+
+Bank 83 103 Mu2026 Hybrid - MU2000 bank 83:103
+4 5 Det.EP 1
+5 6 Det.EP 8
+9 10 PercGlok
+12 13 MelwMrmb
+14 15 TmplBel 5
+
+Bank 83 104 Mu2026 Hybrid - MU2000 bank 83:104
+4 5 Det.EP 2
+5 6 Det.EP 9
+12 13 Gtrimba
+14 15 BlowBell
+
+Bank 83 105 Mu2026 Hybrid - MU2000 bank 83:105
+4 5 Det.EP 3
+5 6 Det.EP 10
+12 13 SynDecay
+14 15 SoftBell
+
+Bank 83 106 Mu2026 Hybrid - MU2000 bank 83:106
+14 15 DumBells
+
+Bank 83 107 Mu2026 Hybrid - MU2000 bank 83:107
+14 15 Crystal
+
+Bank 83 108 Mu2026 Hybrid - MU2000 bank 83:108
+14 15 MeloBell
+
+Bank 83 109 Mu2026 Hybrid - MU2000 bank 83:109
+14 15 Det.Bell
+
+Bank 98 0 Mu2026 Hybrid - SG singing voices
+0 M-Male
+1 M-ASoft
+2 M-AHusky
+3 M-Enka
+4 M-Opera
+5 M-Classc
+6 M-Antiq
+7 M-DamiVo
+8 M-MidAge
+9 M-Heavy
+10 M-YngMan
+11 M-YSoft
+12 M-YHusky
+13 M-AGO
+14 M-Idol
+15 M-Honest
+20 F-NMusic
+21 F-Weak
+22 F-Modrat
+23 F-Enka
+24 F-Opera
+25 F-Coquet
+26 F-Antiq
+27 F-Nose
+28 F-Chobo
+30 F-Pops
+31 F-Soft
+32 F-Boyish
+33 F-Buriko
+34 F-Bright
+35 F-Teens
+36 F-Honest
+40 K-Boy
+41 K-Girl
+42 K-Baby
+43 NoseKid
+44 Comical
+50 C-Goat
+51 C-Frog
+52 C-Crow
+53 C-Cow
+54 C-Msqito
+60 A-Mercry
+61 A-Venus
+62 A-Mars
+63 A-Jupitr
+64 A-Saturn
+70 R-Mirai
+71 AM.Radio
+72 R-HAL100
+73 TinyUFO
+74 SpSiren
+75 R-LowFi
+76 R-Kororo
+77 CrzyRobo
+78 OpenRobo
+79 R-Trmolo
+80 VTrumpet
+81 VOrgan
+82 VSynBass
+83 VSynth1
+84 VSynth2
+90 N-Wind
+91 N-Wtrfal
+92 N-Storm
+93 N-Sea
+94 WaterEFX
+100 O-Cry
+101 Dosukoi
+102 O-Onchi
+103 Unison1
+104 Unison2
+
+Bank 99 79 Mu2026 Hybrid - MU2000 bank 99:79
+62 63 Court
+
+Bank 99 80 Mu2026 Hybrid - MU2000 bank 99:80
+62 63 Juice
+
+Bank 126 0 Mu2026 Hybrid - MU2000 bank 126:0
+0 SFX Kit 1
+1 SFX Kit 2
+16 Techno Kit K/S ****
+17 Techno Kit Hi ****
+18 Techno Kit Lo ****
+32 Sakura Kit ****
+33 Small Latin Kit ****
+34 +++China Kit
+112 Short kit01
+113 Short kit02
+114 Short kit03
+115 Short kit04
+
+Bank 127 0 Mu2026 Hybrid - MU2000 bank 127:0
+0 StandKit MU100 Native ****
+1 StndKit2
+2 Dry Kit ***
+3 BriteKit ***
+4 Skim Kit ****
+5 Slim Kit ****
+6 RogueKit ****
+7 Hob Kit ****
+8 Room Kit
+9 DarkRKit ***
+16 Rock Kit
+17 RockKit2 ***
+24 ElctrKit
+25 AnalgKit
+26 AnlgKit2 ***
+27 DanceKit ***
+28 HipHpKit ***
+29 JunglKit *
+30 ApogeeKt *
+31 PergeeKt
+32 Jazz Kit
+33 JazzKit2
+40 BrushKit
+41 BrshKit2
+48 SymphKit
+56 +++Ntrl Kit
+57 +++NtFunkKt
+64 TrampKit
+65 AmberKit
+66 CoffinKt
+126 StndKit#
+127 StandKit

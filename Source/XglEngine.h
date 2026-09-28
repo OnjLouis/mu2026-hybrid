@@ -17,7 +17,7 @@ class MuVoiceCatalog;
 class XglEngine {
 public:
     static constexpr std::size_t partCount = 16;
-    static constexpr std::size_t busCount = 10;
+    static constexpr std::size_t busCount = 12;
 
     XglEngine(const std::filesystem::path& enginePath,
               const std::filesystem::path& bankPath,

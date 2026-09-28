@@ -107,6 +107,13 @@ add_executable(HybridHostProbe
 target_compile_definitions(HybridHostProbe PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
 target_link_options(HybridHostProbe PRIVATE -static -static-libgcc -static-libstdc++)
 
+add_executable(HybridTimedProbe
+    Tests/HybridTimedProbe.cpp
+    Source/Vst2Abi.h
+)
+target_compile_definitions(HybridTimedProbe PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_link_options(HybridTimedProbe PRIVATE -static -static-libgcc -static-libstdc++)
+
 add_executable(HybridXgForwardingProbe
     Tests/HybridXgForwardingProbe.cpp
     Source/Vst2Abi.h

@@ -27,5 +27,31 @@ int main()
         0xf0, 0x43, 0x10, 0x4c, 0x02, 0x01, 0x5a, 0x00, 0xf7,
     };
     assert(!hybrid::muInsertionForVariation(connection));
+
+    hybrid::MuInsertion2Routing insertion2;
+    constexpr std::array<std::uint8_t, 10> distortion {
+        0xf0, 0x43, 0x10, 0x4c, 0x03, 0x01, 0x00, 0x49, 0x00, 0xf7,
+    };
+    constexpr std::array<std::uint8_t, 9> assignedPart {
+        0xf0, 0x43, 0x10, 0x4c, 0x03, 0x01, 0x0c, 0x00, 0xf7,
+    };
+    insertion2.observe(distortion);
+    insertion2.observe(assignedPart);
+    assert(insertion2.appliesTo(0));
+    assert(insertion2.assignedPart() == 0);
+    assert(insertion2.appliesToSoleRoute(1));
+    assert(!insertion2.appliesToSoleRoute(3));
+    assert(!insertion2.appliesToSoleRoute(2));
+    assert(!insertion2.appliesTo(1));
+    constexpr std::array<std::uint8_t, 10> bypass {
+        0xf0, 0x43, 0x10, 0x4c, 0x03, 0x01, 0x00, 0x00, 0x00, 0xf7,
+    };
+    insertion2.observe(bypass);
+    assert(!insertion2.appliesTo(0));
+    assert(!insertion2.assignedPart());
+    assert(!insertion2.appliesToSoleRoute(1));
+    insertion2.observe(distortion);
+    insertion2.reset();
+    assert(!insertion2.appliesTo(0));
     return 0;
 }

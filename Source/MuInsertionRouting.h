@@ -43,4 +43,50 @@ inline std::optional<MuInsertionMessage> muInsertionForVariation(
     return result;
 }
 
+class MuInsertion2Routing {
+public:
+    void reset() noexcept
+    {
+        typeEnabled = false;
+        part.reset();
+    }
+
+    void observe(std::span<const std::uint8_t> sysex) noexcept
+    {
+        if ((sysex.size() != 9 && sysex.size() != 10)
+            || sysex.front() != 0xf0 || sysex.back() != 0xf7
+            || sysex[1] != 0x43 || (sysex[2] & 0xf0) != 0x10
+            || sysex[3] != 0x4c || sysex[4] != 0x03
+            || sysex[5] != 0x01)
+            return;
+
+        if (sysex[6] == 0x00 && sysex.size() == 10)
+            typeEnabled = sysex[7] != 0 || sysex[8] != 0;
+        else if (sysex[6] == 0x0c && sysex.size() == 9)
+            part = sysex[7] < 16
+                ? std::optional<std::uint8_t>(sysex[7])
+                : std::nullopt;
+    }
+
+    [[nodiscard]] bool appliesTo(std::uint8_t channel) const noexcept
+    {
+        return typeEnabled && part == channel;
+    }
+
+    [[nodiscard]] std::optional<std::uint8_t> assignedPart() const noexcept
+    {
+        return typeEnabled ? part : std::nullopt;
+    }
+
+    [[nodiscard]] bool appliesToSoleRoute(std::uint32_t routeMask) const noexcept
+    {
+        return typeEnabled && part
+            && routeMask == (std::uint32_t {1} << *part);
+    }
+
+private:
+    bool typeEnabled {};
+    std::optional<std::uint8_t> part;
+};
+
 } // namespace hybrid
