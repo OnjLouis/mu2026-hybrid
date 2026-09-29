@@ -18,7 +18,7 @@
 namespace {
 
 constexpr int maximumBlockSize = 4096;
-constexpr int sampleRate = 44100;
+int sampleRate = 44100;
 constexpr int maxEventsPerBlock = 2048;
 int blockSize = maximumBlockSize;
 
@@ -105,13 +105,18 @@ std::vector<TimedEvent> loadEvents(const char* path)
 
 int main(int argc, char** argv)
 {
-    if (argc < 3 || argc > 7) {
-        std::fprintf(stderr, "usage: HybridTimedProbe <wrapper.dll> <events.txt> [seconds] [block frames] [output.wav] [instances]\n");
+    if (argc < 3 || argc > 8) {
+        std::fprintf(stderr, "usage: HybridTimedProbe <wrapper.dll> <events.txt> [seconds] [block frames] [output.wav] [instances] [sample rate]\n");
         return 2;
     }
-    const int instanceCount = argc == 7 ? std::stoi(argv[6]) : 1;
+    const int instanceCount = argc >= 7 ? std::stoi(argv[6]) : 1;
     if (instanceCount < 1 || instanceCount > 3)
         throw std::runtime_error("instance count must be 1 to 3");
+    if (argc == 8) {
+        sampleRate = std::stoi(argv[7]);
+        if (sampleRate < 8000 || sampleRate > 192000)
+            throw std::runtime_error("sample rate must be 8000 to 192000 Hz");
+    }
     if (argc >= 5) {
         blockSize = std::stoi(argv[4]);
         if (blockSize < 16 || blockSize > maximumBlockSize)
@@ -147,9 +152,15 @@ int main(int argc, char** argv)
     HMODULE module = LoadLibraryA(argv[1]);
     if (!module)
         throw std::runtime_error("failed to load wrapper DLL");
-    const auto entry = reinterpret_cast<vst2::EntryPoint>(GetProcAddress(module, "main"));
+    auto entry = reinterpret_cast<vst2::EntryPoint>(
+        GetProcAddress(module, "VSTPluginMain"));
+    if (!entry)
+        entry = reinterpret_cast<vst2::EntryPoint>(GetProcAddress(module, "main"));
     if (!entry)
         throw std::runtime_error("wrapper has no VST entry point");
+    using SetNativeEngine = bool (*)(vst2::AEffect*, int);
+    const auto setNativeEngine = reinterpret_cast<SetNativeEngine>(
+        GetProcAddress(module, "Mu2026SetNativeEngine"));
     std::vector<vst2::AEffect*> effects;
     std::vector<std::array<float, maximumBlockSize>> channels(instanceCount * 2);
     std::vector<std::array<float*, 2>> outputs(instanceCount);
@@ -158,6 +169,8 @@ int main(int argc, char** argv)
         if (!effect || effect->magic != vst2::effectMagic)
             throw std::runtime_error("invalid VST effect");
         effect->dispatcher(effect, vst2::open, 0, 0, nullptr, 0.0f);
+        if (setNativeEngine && std::getenv("HYBRID_PROBE_NATIVE_ENGINE"))
+            setNativeEngine(effect, std::atoi(std::getenv("HYBRID_PROBE_NATIVE_ENGINE")));
         effect->dispatcher(effect, vst2::setSampleRate, 0, 0, nullptr,
                            static_cast<float>(sampleRate));
         effect->dispatcher(effect, vst2::setBlockSize, 0, blockSize, nullptr, 0.0f);

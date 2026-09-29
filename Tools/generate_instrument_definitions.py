@@ -8,7 +8,6 @@ from pathlib import Path
 VL_BANKS = {4224, 4225, 12544}
 BANK_NAMES = {
     0: "MU2000 main voices",
-    2048: "MU2000 sampling voices",
     4224: "VL",
     4225: "PVL",
     12544: "SG singing voices",
@@ -42,6 +41,10 @@ def combine(mu_lines, hybrid_lines):
             added[key] = row[2]
     if len(added) != 328:
         raise ValueError(f"Expected 328 VL/PVL/SG voices, found {len(added)}")
+
+    sampling_start = mu_lines.index("; mu2000 sampling voices")
+    normal_start = mu_lines.index("; Normal voices")
+    mu_lines = mu_lines[:sampling_start] + mu_lines[normal_start:]
 
     start = mu_lines.index("; Normal voices")
     end = mu_lines.index("; Model Exclusive voices")

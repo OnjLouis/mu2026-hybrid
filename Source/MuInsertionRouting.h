@@ -43,12 +43,11 @@ inline std::optional<MuInsertionMessage> muInsertionForVariation(
     return result;
 }
 
-class MuInsertion2Routing {
+class MuInsertionRouting {
 public:
     void reset() noexcept
     {
-        typeEnabled = false;
-        part.reset();
+        assignments = {};
     }
 
     void observe(std::span<const std::uint8_t> sysex) noexcept
@@ -57,36 +56,45 @@ public:
             || sysex.front() != 0xf0 || sysex.back() != 0xf7
             || sysex[1] != 0x43 || (sysex[2] & 0xf0) != 0x10
             || sysex[3] != 0x4c || sysex[4] != 0x03
-            || sysex[5] != 0x01)
+            || sysex[5] < 0x01 || sysex[5] > 0x03)
             return;
 
+        auto& assignment = assignments[sysex[5] - 1];
         if (sysex[6] == 0x00 && sysex.size() == 10)
-            typeEnabled = sysex[7] != 0 || sysex[8] != 0;
+            assignment.typeEnabled = sysex[7] != 0 || sysex[8] != 0;
         else if (sysex[6] == 0x0c && sysex.size() == 9)
-            part = sysex[7] < 16
+            assignment.part = sysex[7] < 16
                 ? std::optional<std::uint8_t>(sysex[7])
                 : std::nullopt;
     }
 
-    [[nodiscard]] bool appliesTo(std::uint8_t channel) const noexcept
+    [[nodiscard]] std::optional<std::uint8_t> targetFor(
+        std::uint8_t channel) const noexcept
     {
-        return typeEnabled && part == channel;
+        for (std::size_t index = 0; index < assignments.size(); ++index)
+            if (assignments[index].typeEnabled
+                && assignments[index].part == channel)
+                return static_cast<std::uint8_t>(index + 2);
+        return std::nullopt;
     }
 
-    [[nodiscard]] std::optional<std::uint8_t> assignedPart() const noexcept
+    [[nodiscard]] std::optional<std::uint8_t> targetForSoleRoute(
+        std::uint32_t routeMask) const noexcept
     {
-        return typeEnabled ? part : std::nullopt;
-    }
-
-    [[nodiscard]] bool appliesToSoleRoute(std::uint32_t routeMask) const noexcept
-    {
-        return typeEnabled && part
-            && routeMask == (std::uint32_t {1} << *part);
+        for (std::size_t index = 0; index < assignments.size(); ++index)
+            if (assignments[index].typeEnabled && assignments[index].part
+                && routeMask == (std::uint32_t {1}
+                    << *assignments[index].part))
+                return static_cast<std::uint8_t>(index + 2);
+        return std::nullopt;
     }
 
 private:
-    bool typeEnabled {};
-    std::optional<std::uint8_t> part;
+    struct Assignment {
+        bool typeEnabled {};
+        std::optional<std::uint8_t> part;
+    };
+    std::array<Assignment, 3> assignments {};
 };
 
 } // namespace hybrid

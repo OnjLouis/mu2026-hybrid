@@ -50,19 +50,20 @@ constexpr std::size_t maxVlVoices = 8;
 // list. Keep dense setup bursts intact in one dispatcher call.
 constexpr std::size_t childEventsPerBatch = 4096;
 constexpr std::size_t maxChildEventBatches = 8;
-constexpr std::size_t maxSyntheticPartModeEvents = childEventsPerBatch;
 constexpr std::size_t maxSyntheticGsEffectEvents = childEventsPerBatch;
+constexpr std::size_t maxSyntheticPartModeEvents = childEventsPerBatch;
 constexpr float int16Scale = 1.0f / 32768.0f;
 constexpr float defaultNativeOutputGain = 2.0f;
+constexpr float defaultXglOutputGain = 0.75f;
 // MU's MEG dry path returns about 0.1767 of an injected bus's input level.
 constexpr float muFxInputCompensation = 1.0f / 0.1767f;
 constexpr std::uint32_t nativeSampleRate = 44'100;
 constexpr std::size_t vlSignalBusCount = hybrid::ipc::planeCount * 2;
-constexpr std::size_t vlOutputBusCount = vlSignalBusCount + 2;
-constexpr std::size_t muInputBusCount = 12;
+constexpr std::size_t vlOutputBusCount = vlSignalBusCount + 6;
+constexpr std::size_t muInputBusCount = 16;
 constexpr std::size_t renderQuantumFrames = 512;
 constexpr std::int32_t hybridUniqueId = 0x4d323648; // "M26H"
-constexpr std::int32_t hybridVendorVersion = 100;
+constexpr std::int32_t hybridVendorVersion = 101;
 constexpr char hybridEffectName[] = "Mu2026 Hybrid";
 constexpr char hybridVendorName[] = "Onj Research";
 
@@ -181,7 +182,7 @@ struct WrapperState {
     hybrid::MidiRouter router;
     hybrid::GsEffectTranslator gsEffectTranslator;
     hybrid::XgVariationRouting variationRouting;
-    hybrid::MuInsertion2Routing insertion2Routing;
+    hybrid::MuInsertionRouting insertionRouting;
     bool insertionEffectEnabled {};
     hybrid::XgPartModes childPartModes;
     hybrid::HybridStatus status;
@@ -224,6 +225,7 @@ struct WrapperState {
     hybrid::StreamingRateAdapter nativeRateAdapter;
     float sampleRate {};
     float nativeOutputGain {defaultNativeOutputGain};
+    float xglOutputGain {defaultXglOutputGain};
     bool vlAvailable {};
     bool sgAvailable {};
     bool vlSetupHistoryFrozen {};
@@ -288,6 +290,24 @@ float readNativeOutputGain(const std::filesystem::path& directory) noexcept
     if (end == text || *end != L'\0' || !std::isfinite(value)
         || value < 0.1f || value > 8.0f) {
         return defaultNativeOutputGain;
+    }
+    return value;
+}
+
+float readXglOutputGain(const std::filesystem::path& directory) noexcept
+{
+    wchar_t text[32] {};
+    const auto length = GetPrivateProfileStringW(
+        L"engine", L"xgl_gain", L"", text,
+        static_cast<DWORD>(std::size(text)),
+        (directory / L"mu2026.ini").c_str());
+    if (length == 0 || length >= std::size(text))
+        return defaultXglOutputGain;
+    wchar_t* end {};
+    const auto value = std::wcstof(text, &end);
+    if (end == text || *end != L'\0' || !std::isfinite(value)
+        || value < 0.1f || value > 2.0f) {
+        return defaultXglOutputGain;
     }
     return value;
 }
@@ -1090,9 +1110,12 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                 if (operation == 0xb0 && controller == 0) {
                     if (const auto change = wrapper.childPartModes.selectBankMsb(
                             channel, value)) {
-                        if (retainPartModeChange(wrapper, *change,
-                                                 midi->deltaFrames,
-                                                 firstChildEvent)) {
+                        // XG bank 127 selects MU's drum kit by itself. The
+                        // extra part-mode message would replace that kit.
+                        if (value != hybrid::XgPartModes::rhythmBankMsb
+                            && retainPartModeChange(wrapper, *change,
+                                                    midi->deltaFrames,
+                                                    firstChildEvent)) {
                             firstChildEvent = false;
                         }
                     }
@@ -1301,7 +1324,7 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                         wrapper.childPartModes.reset(systemReset);
                         wrapper.gsEffectTranslator.reset();
                         wrapper.variationRouting.reset();
-                        wrapper.insertion2Routing.reset();
+                        wrapper.insertionRouting.reset();
                         wrapper.insertionEffectEnabled = false;
                         resetVlPlaybackState(wrapper);
                         wrapper.status.reset(displayReset(systemReset));
@@ -1313,7 +1336,7 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                     }
                     (void)wrapper.childPartModes.observe(bytes);
                     wrapper.variationRouting.observe(bytes);
-                    wrapper.insertion2Routing.observe(bytes);
+                    wrapper.insertionRouting.observe(bytes);
                     if (bytes.size() == 10 && bytes[0] == 0xf0
                         && bytes[1] == 0x43 && (bytes[2] & 0xf0) == 0x10
                         && bytes[3] == 0x4c && bytes[4] == 0x02
@@ -1576,12 +1599,12 @@ void mixVlChannelBlock(WrapperState& wrapper, VlVoiceState& voice,
                        std::uint8_t voiceIndex, std::int32_t outputOffset,
                        std::uint32_t frames)
 {
-    const bool insertion2 = wrapper.insertion2Routing.appliesTo(
+    const auto insertion = wrapper.insertionRouting.targetFor(
         wrapper.vlVoiceAllocator.channel(voiceIndex));
     for (std::size_t plane = 0; plane < hybrid::ipc::planeCount; ++plane) {
         const auto stereo = voice.client->plane(plane, frames);
-        const auto bus = insertion2 && plane == 0
-            ? vlSignalBusCount : plane * 2;
+        const auto bus = insertion && plane == 0
+            ? vlSignalBusCount + (*insertion - 2) * 2 : plane * 2;
         auto* left = nativeBus(wrapper, bus);
         auto* right = nativeBus(wrapper, bus + 1);
         for (std::uint32_t frame = 0; frame < frames; ++frame) {
@@ -1625,12 +1648,12 @@ void renderSgSegment(WrapperState& wrapper, std::int32_t outputOffset,
         const auto block = static_cast<std::uint32_t>(std::min<std::int32_t>(
             frames, hybrid::NativeSgClient::maxFrames));
         wrapper.sg.client->render(block);
-        const bool insertion2 = wrapper.insertion2Routing.appliesToSoleRoute(
+        const auto insertion = wrapper.insertionRouting.targetForSoleRoute(
             wrapper.sg.routeMask);
         for (std::size_t plane = 0; plane < hybrid::ipc::planeCount; ++plane) {
             const auto stereo = wrapper.sg.client->plane(plane, block);
-            const auto bus = insertion2 && plane == 0
-                ? vlSignalBusCount : plane * 2;
+            const auto bus = insertion && plane == 0
+                ? vlSignalBusCount + (*insertion - 2) * 2 : plane * 2;
             auto* left = nativeBus(wrapper, bus);
             auto* right = nativeBus(wrapper, bus + 1);
             for (std::uint32_t frame = 0; frame < block; ++frame) {
@@ -1858,7 +1881,8 @@ std::array<float*, muInputBusCount> prepareMuInputBuses(
             }
             destination[frame] = (native * wrapper.nativeOutputGain
                 + (renderedXgl && bus < hybrid::XglEngine::busCount
-                    ? xglBus(wrapper, bus)[frame] : 0.0f))
+                    ? xglBus(wrapper, bus)[frame] * wrapper.xglOutputGain
+                    : 0.0f))
                 * muFxInputCompensation;
         }
     }
@@ -2088,6 +2112,7 @@ extern "C" __declspec(dllexport) vst2::AEffect* VSTPluginMain(
     wrapperState->sgWorkerPath = sgWorkerPath;
     wrapperState->sampleRate = initialRate;
     wrapperState->nativeOutputGain = readNativeOutputGain(directory);
+    wrapperState->xglOutputGain = readXglOutputGain(directory);
     wrapperState->suspendUnused = GetPrivateProfileIntW(
         L"engine", L"suspend_unused", 0,
         (directory / L"mu2026.ini").c_str()) == 1;

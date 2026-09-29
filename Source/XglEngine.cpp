@@ -186,7 +186,7 @@ public:
     void reset(MidiSystemReset system = MidiSystemReset::xg)
     {
         variationRouting.reset();
-        insertion2Routing.reset();
+        insertionRouting.reset();
         insertionEffectEnabled = false;
         partModes.reset(system);
         for (std::size_t partIndex = 0; partIndex < parts.size(); ++partIndex) {
@@ -233,7 +233,7 @@ public:
         }
         const auto previousPart = activeInsertionPart();
         variationRouting.observe(sysex);
-        insertion2Routing.observe(sysex);
+        insertionRouting.observe(sysex);
         if (const auto keyShift = gsPartKeyShift(sysex)) {
             queueKeyShift(parts[keyShift->part], keyShift->rpnCoarseTune,
                           deltaFrames);
@@ -560,9 +560,11 @@ private:
                 buses[9 * stride + frame] += r * insertionPrePanGain;
                 continue;
             }
-            if (insertion2Routing.appliesTo(static_cast<std::uint8_t>(partIndex))) {
-                buses[10 * stride + frame] += l;
-                buses[11 * stride + frame] += r;
+            if (const auto insertion = insertionRouting.targetFor(
+                    static_cast<std::uint8_t>(partIndex))) {
+                const auto bus = 10 + (*insertion - 2) * 2;
+                buses[bus * stride + frame] += l;
+                buses[(bus + 1) * stride + frame] += r;
                 continue;
             }
             buses[0 * stride + frame] += l;
@@ -584,7 +586,7 @@ private:
     const MuVoiceCatalog* muCatalog {};
     XglVoiceMap voiceMap;
     XgVariationRouting variationRouting;
-    MuInsertion2Routing insertion2Routing;
+    MuInsertionRouting insertionRouting;
     bool insertionEffectEnabled {};
     std::vector<float> left;
     std::vector<float> right;
