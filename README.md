@@ -29,8 +29,8 @@ DLL. These are the settings used in the Foobar performance and gain checks.
 
 ## First-pass verification
 
-- Twenty-four focused CTest cases pass, including firmware-mode selection and
-  rejection cleanup with a ROM-free mock engine.
+- Twenty-five focused CTest cases pass, including firmware-mode selection,
+  rejection cleanup, and pre-bank VL controller setup with ROM-free mocks.
 - MU dry, reverb, chorus, variation, and all four insertions process injected
   audio at 44.1 and 48 kHz in the child probe.
 - The assembled wrapper passes host probes for MU, 2006LE fallback, native VL,
@@ -46,6 +46,12 @@ PLG board. An insertion is applied to SG only when the worker reports a single
 assigned MIDI channel; a multi-channel SG mix cannot be separated afterward.
 Long-term performance, very low-buffer live use, effect parameter parity, and
 hardware comparisons remain unverified.
+
+Version 0.1.3 retains ordered non-note controller setup before VL bank selection.
+This restores early volume, reverb, chorus and CC94 variation sends in the
+reported files without changing gains or replaying MU notes into VL. Controlled
+variation on/off comparisons differ at 44.1 and 48 kHz; local listening confirms
+the improvement. Exact physical-hardware effect parity still needs comparison.
 
 Version 0.1.2 selects Yamaha's original firmware voice path at load, ignoring
 the older native=1 shortcut. This preserves MU voice/controller behaviour while

@@ -11,6 +11,7 @@ struct Instance {
 
 int lastMode = -1;
 bool rejectMode = false;
+int inputBus = -1;
 
 vst2::IntPtr dispatch(vst2::AEffect* effect, std::int32_t opcode,
                      std::int32_t, vst2::IntPtr, void*, float)
@@ -20,11 +21,14 @@ vst2::IntPtr dispatch(vst2::AEffect* effect, std::int32_t opcode,
     return 0;
 }
 
-void render(vst2::AEffect* effect, float**, float** output, std::int32_t count)
+void render(vst2::AEffect* effect, float** inputs, float** output, std::int32_t count)
 {
     const auto mode = static_cast<Instance*>(effect->object)->mode;
     for (int channel = 0; channel < 2; ++channel)
-        std::fill_n(output[channel], count, mode == 0 ? 0.125f : 0.25f);
+        if (inputBus >= 0 && inputs)
+            std::copy_n(inputs[inputBus + channel], count, output[channel]);
+        else
+            std::fill_n(output[channel], count, mode == 0 ? 0.125f : 0.25f);
 }
 
 }
@@ -61,4 +65,9 @@ extern "C" __declspec(dllexport) int Mu2026TestMode()
 extern "C" __declspec(dllexport) void Mu2026TestRejectMode(bool reject)
 {
     rejectMode = reject;
+}
+
+extern "C" __declspec(dllexport) void Mu2026TestInputBus(int bus)
+{
+    inputBus = bus;
 }

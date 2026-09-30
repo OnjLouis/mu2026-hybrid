@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(Mu2026Hybrid VERSION 0.1.2 LANGUAGES CXX)
+project(Mu2026Hybrid VERSION 0.1.3 LANGUAGES CXX)
 
 if(NOT WIN32 OR CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "Mu2026 Hybrid currently requires a 32-bit Windows target")
@@ -455,3 +455,11 @@ target_link_options(NativeWorkerPreloaderTests PRIVATE
 target_compile_options(NativeWorkerPreloaderTests PRIVATE -UNDEBUG)
 add_dependencies(NativeWorkerPreloaderTests NativeWorkerStub)
 add_test(NAME NativeWorkerPreloaderTests COMMAND NativeWorkerPreloaderTests)
+
+add_executable(HybridControllerSetupProbe Tests/HybridControllerSetupProbe.cpp)
+set_target_properties(HybridControllerSetupProbe PROPERTIES OUTPUT_NAME "HybridPreBankControllerProbe")
+target_compile_definitions(HybridControllerSetupProbe PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_link_options(HybridControllerSetupProbe PRIVATE -static -static-libgcc -static-libstdc++)
+add_dependencies(HybridControllerSetupProbe Mu2026Hybrid MockMuEngine NativeWorkerStub)
+add_test(NAME HybridControllerSetupProbe COMMAND HybridControllerSetupProbe
+    $<TARGET_FILE:Mu2026Hybrid> $<TARGET_FILE:MockMuEngine> $<TARGET_FILE:NativeWorkerStub>)

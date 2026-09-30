@@ -63,7 +63,7 @@ constexpr std::size_t vlOutputBusCount = vlSignalBusCount + 6;
 constexpr std::size_t muInputBusCount = 16;
 constexpr std::size_t renderQuantumFrames = 512;
 constexpr std::int32_t hybridUniqueId = 0x4d323648; // "M26H"
-constexpr std::int32_t hybridVendorVersion = 102;
+constexpr std::int32_t hybridVendorVersion = 103;
 constexpr char hybridEffectName[] = "Mu2026 Hybrid";
 constexpr char hybridVendorName[] = "Onj Research";
 
@@ -1153,9 +1153,17 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                     && !retainSgShort(wrapper, packed, eventFrame)) {
                     wrapper.sgSetupHistoryFrozen = true;
                 }
+                // Files can set controllers before selecting a VL bank. Keep
+                // their ordered setup without replaying notes from the MU part.
+                wrapper.vlChannelSnapshots[channel].observe(packed);
+                if (destination == hybrid::MidiDestination::xg
+                    && operation != 0x80 && operation != 0x90
+                    && !wrapper.vlSetupHistoryFrozen
+                    && !retainVlShort(wrapper, channel, packed)) {
+                    wrapper.vlSetupHistoryFrozen = true;
+                }
                 if (destination != hybrid::MidiDestination::xg) {
                     try {
-                        wrapper.vlChannelSnapshots[channel].observe(packed);
                         if (isNoteOn(packed)) {
                             const auto allocation = wrapper.vlVoiceAllocator.noteOn(
                                 channel, midiNote(packed));
