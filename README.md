@@ -29,9 +29,10 @@ DLL. These are the settings used in the Foobar performance and gain checks.
 
 ## First-pass verification
 
-- Twenty-three focused CTest cases pass.
-- MU dry, reverb, chorus, variation, insertion 1, and the slave-DSP
-  insertion 2 process injected audio at 44.1 and 48 kHz in the child probe.
+- Twenty-four focused CTest cases pass, including firmware-mode selection and
+  rejection cleanup with a ROM-free mock engine.
+- MU dry, reverb, chorus, variation, and all four insertions process injected
+  audio at 44.1 and 48 kHz in the child probe.
 - The assembled wrapper passes host probes for MU, 2006LE fallback, native VL,
   native SG, two instances, and accessible editor creation.
 - 2006LE insertion bypass and distortion yield distinct, audible outputs.
@@ -41,13 +42,23 @@ DLL. These are the settings used in the Foobar performance and gain checks.
   fallback voice also respond to insertion-2 assignment.
 
 The worker injection path is not a verified emulation of a physical MU2000
-PLG board. Insertion 2 is applied to SG only when the worker reports a single
+PLG board. An insertion is applied to SG only when the worker reports a single
 assigned MIDI channel; a multi-channel SG mix cannot be separated afterward.
-External audio through insertions 3 and 4, long-term performance, low-buffer
-live use, effect parameter parity, and hardware comparisons remain unverified.
-In local Foobar listening tests,
-the current native mode was smooth during a previously problematic song, and
-VL/SG balance at gain 2.0 was judged clean in two complete songs.
+Long-term performance, very low-buffer live use, effect parameter parity, and
+hardware comparisons remain unverified.
+
+Version 0.1.2 selects Yamaha's original firmware voice path at load, ignoring
+the older native=1 shortcut. This preserves MU voice/controller behaviour while
+keeping external VL/SG/2006LE effect routing. Local comparisons against original
+MU found no apparent polyphony losses in the reported files. A silent-bus
+resampling optimization made a 90-second stress render about 14% faster with
+byte-identical audio. Event processing and first-worker preparation can still
+cause short deadline overruns; this is not a guarantee of glitch-free use in
+every host or at every buffer size.
+
+For buffering guidance and a complete INI example, see the user guide's
+Performance settings section. Set suspend_unused=1 under [engine] beside the
+VST DLL and restart the host; updates preserve rather than rewrite user INIs.
 
 ## Build
 

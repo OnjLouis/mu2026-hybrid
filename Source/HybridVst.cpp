@@ -63,7 +63,7 @@ constexpr std::size_t vlOutputBusCount = vlSignalBusCount + 6;
 constexpr std::size_t muInputBusCount = 16;
 constexpr std::size_t renderQuantumFrames = 512;
 constexpr std::int32_t hybridUniqueId = 0x4d323648; // "M26H"
-constexpr std::int32_t hybridVendorVersion = 101;
+constexpr std::int32_t hybridVendorVersion = 102;
 constexpr char hybridEffectName[] = "Mu2026 Hybrid";
 constexpr char hybridVendorName[] = "Onj Research";
 
@@ -2085,14 +2085,16 @@ extern "C" __declspec(dllexport) vst2::AEffect* VSTPluginMain(
         return nullptr;
     }
 
-    const auto nativeMode = GetPrivateProfileIntW(
-        L"engine", L"native", 0, (directory / L"mu2026.ini").c_str());
-    if (nativeMode == 1) {
-        using SetNativeEngine = bool (__cdecl *)(vst2::AEffect*, int);
-        const auto setNativeEngine = reinterpret_cast<SetNativeEngine>(
-            GetProcAddress(module, "Mu2026SetNativeEngine"));
-        if (setNativeEngine != nullptr)
-            setNativeEngine(child, 1);
+    // Keep MU voice allocation, envelopes and controllers in Yamaha's firmware.
+    // The old native=1 default reconstructed these and lost audible details.
+    using SetNativeEngine = bool (__cdecl *)(vst2::AEffect*, int);
+    const auto setNativeEngine = reinterpret_cast<SetNativeEngine>(
+        GetProcAddress(module, "Mu2026SetNativeEngine"));
+    constexpr int firmwareVoiceEngine = 0;
+    if (setNativeEngine == nullptr || !setNativeEngine(child, firmwareVoiceEngine)) {
+        child->dispatcher(child, vst2::close, 0, 0, nullptr, 0.0f);
+        FreeLibrary(module);
+        return nullptr;
     }
 
     auto* wrapperState = new (std::nothrow) WrapperState;

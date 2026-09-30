@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(Mu2026Hybrid VERSION 0.1.1 LANGUAGES CXX)
+project(Mu2026Hybrid VERSION 0.1.2 LANGUAGES CXX)
 
 if(NOT WIN32 OR CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "Mu2026 Hybrid currently requires a 32-bit Windows target")
@@ -150,6 +150,14 @@ target_link_options(HybridEditorHostProbe PRIVATE
 )
 
 enable_testing()
+
+add_library(MockMuEngine SHARED Tests/MockMuEngine.cpp)
+target_link_options(MockMuEngine PRIVATE -static -static-libgcc -static-libstdc++)
+add_executable(HybridFirmwareModeProbe Tests/HybridFirmwareModeProbe.cpp)
+target_compile_definitions(HybridFirmwareModeProbe PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_link_options(HybridFirmwareModeProbe PRIVATE -static -static-libgcc -static-libstdc++)
+add_test(NAME HybridFirmwareModeProbe COMMAND HybridFirmwareModeProbe
+    $<TARGET_FILE:Mu2026Hybrid> $<TARGET_FILE:MockMuEngine>)
 
 add_executable(MuVoiceCatalogTests
     Tests/MuVoiceCatalogTests.cpp

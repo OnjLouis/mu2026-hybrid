@@ -1,4 +1,4 @@
-# Mu2026 Hybrid 0.1.1 tester notes
+# Mu2026 Hybrid 0.1.2 tester notes
 
 This is an early 32-bit Windows VST2 build, separate from S-YXG100 Hybrid and
 S-YXG2026 Hybrid. It uses a modified S-MU2000 engine for MU2000 voices and
@@ -10,14 +10,23 @@ definitions. It does not contain Yamaha ROMs, firmware, tables, VXDs, or song
 files. See README.html for the required local files and ROM layout. Keep your
 existing `mu2026.ini` and `roms.txt`; the updater does not replace them.
 
-This update corrects Shellshk's drum pitch and CC94-driven variation delay,
-preserves external-FX headroom at 48 kHz, and exposes MU insertion effects 3
-and 4 to VL, SG, and fallback voices. Shellshk's drums and delay were checked
-in live Foobar playback. Engine probes distinguish all four insertion effects
-from bypass at both 44.1 and 48 kHz. A VL-only FatPizz render changes when
-its CC94 delay send is removed; its exact wet level against hardware remains
-unverified. The silent sampling-bank Voice001-Voice256 entries have been
-removed from the QWS and REAPER definitions.
+This update selects Yamaha's original MU firmware voice path instead of the
+experimental native shortcut. This restores drum-controller filtering and the
+Feed sound in the reported Driftin Away and Trance examples, and brings the
+FatPizz intro much closer to standalone MU. VL, SG and 2006LE injection, gains,
+and all four insertion-effect routes remain in place. Existing native=1 INI
+entries cannot reactivate the shortcut.
+
+Silent external audio buses now skip unnecessary resampling work without
+changing their sample timing or effect tails. A 90-second StarStrp stress
+render was about 14% faster with byte-identical output. Local full-length
+listening comparisons found no apparent polyphony losses in the reported
+examples. Results on other machines and very small buffers still need testing.
+
+For buffering problems, close the host and check that mu2026.ini is beside the
+VST DLL with suspend_unused=1 under [engine], then restart the host. The updater
+preserves existing INIs and does not add missing keys. See README.html for a
+complete example. Do not change VL/SG or 2006LE gain to cure buffering.
 
 Please report the host, sample rate, buffer size, song or MIDI event sequence,
 selected voice map, and whether the problem occurs in S-MU2000 or the older
