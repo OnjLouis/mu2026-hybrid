@@ -4,6 +4,90 @@ Mu2026 Hybrid is a separate 32-bit VST2 wrapper over a modified S-MU2000
 engine. It uses MU2000 voices first, S-YXG2006LE only for detected MU voice
 gaps, and the existing native VL/PVL and SG workers. It does not load XG50.
 
+Research prerelease 0.2.1 integrates native six-operator FM DX voices into the same
+Mu2026 VST identity. It is an opt-in preview, not a stable update. Recovered voice parameters
+are external, private assets; the Google MSFA core is Apache-2.0 with its
+license and modification notice under ThirdParty/msfa. See the HTML guide
+for supported controllers and remaining PLG150-DX compatibility gaps.
+
+It also includes a native, parameter-compatible PLG150-AN listening candidate
+when the separately supplied `plg-an-voices.bin` is present. This is **not VOP3
+chip emulation**. The recovered 256 presets/848 selections feed MU effects,
+but synthesis calibration, complete Free EG, arpeggiation, full unison, morphing and
+custom voice dumps remain incomplete. See the HTML manual for the supported
+controls, bank behaviour, attribution and explicit approximation limits.
+
+The isolated AN filter follow-up restores velocity/key-position matrix inputs
+and filter velocity sensitivity. Filter envelope timing, depth and resonance
+use explicitly documented candidate calibrations, not recovered Yamaha DSP
+curves. RnB pitch is accepted; its filter character still needs listening
+comparison. These changes do not alter MU, DX, VL/PVL, SG or 2006LE engines.
+
+The isolated AN follow-up implements recorded Free EG tracks with loop/time
+selection, LFO waveform shapes and selected PWM sources. Saw pulse width now
+changes its harmonics rather than being ignored; this corrects the measured
+octave error in the RnB bass comparison. This is not a hardware-parity claim.
+Trance's intro, Old_Tek's talking timbre and ProgRock's opening require renewed
+listening after the oscillator and stored-pattern changes below.
+
+The oscillator candidate connects both VCO Edge controls, including recorded
+Free EG, matrix modulation and received Direct edits. Intermediate Edge uses
+a spectral crossfade, not recovered Yamaha DSP. It preserves the reference-tested
+saw pitch law, distinguishes unsynchronised saw2, separates Sync Pmod from FM
+algorithm selection, retains fractional-sample sync timing, and implements the
+documented 60-degree LFO2-phase PWM source. Free-running LFOs use a continuous
+part clock; Key-on mode still resets. The upper documented resonance range no
+longer flattens at the old damping floor. Inner waves, oscillator/filter scaling
+and LFO speed remain approximations. New 70-second comparisons require listening;
+these changes alone do not establish that the reported timbre faults are fixed.
+
+## Listening findings and help wanted
+
+Local listening found Trance closest to its hardware recording after restoring
+HardNoiz's stored eight-step phrase. ProgRock, Old_Tek and RnB still sound much
+like the preceding candidate. Their audible faults are **not resolved**, even
+where the decoded samples differ. This preview is not hardware-equivalent AN.
+
+Please compare Trance's opening rhythm and pitched pattern, ProgRock's opening
+sync/FM and amplifier character, Old_Tek's speech-like modulation, and RnB's
+bass pitch, filter sweep and resonance. Recordings of isolated notes and controlled
+parameter sweeps from a PLG150-AN would help distinguish oscillator, filter,
+envelope and effect differences. The [HTML guide](README.html#listening-feedback)
+explains a repeatable comparison and what to include in a report. Do not upload
+ROMs, firmware, recovered parameter banks or copyrighted recordings to issues.
+
+The stable release remains 0.1.3. The signed updater deliberately ignores
+prereleases; install this preview manually into a separate folder and keep your
+stable copy. Public downloads contain code only. AN and recovered DX presets
+require separately supplied, legally obtained parameter banks.
+
+Single stored voice patterns now play their recovered notes, velocities, rests,
+gate lengths and controller steps. Normal and Shift & Normal keyboard modes,
+C2 transposition, split point, forward/backward loops, swing and Hold are supported.
+Overlapping steps retain separate voices within the existing five-note part limit;
+trigger release, panic, reset and patch changes have bounded stop paths. Trance's
+HardNoiz preset enables an eight-step pattern, which was previously ignored.
+User-pattern selection, alternate loops, arpeggiation and external MIDI-clock
+timing remain unsupported; the latter uses the documented candidate 120-BPM fallback.
+
+The integrated control path connects pulse-width/depth, HPF and
+feedback matrix destinations, received CC/aftertouch Direct edits, independent
+FM depth/wave selectors, and VCO2 sine/triangle cross-modulation. Untouched
+Direct knobs preserve factory settings. FM and cross-modulation depth laws
+remain approximations. Twenty-second reference comparisons still show the
+three demo discrepancies; these control-path fixes are not evidence of hardware
+parity or a complete audible fix. Low-pass calibration and engine gains are
+unchanged.
+
+Manual-backed follow-up corrections put AN's separate 6 dB/octave HPF before
+the VCF, make LP18 a three-pole response, take feedback after the VCA, and put
+board distortion after the VCA. Amp Type Off retains distortion drive and the
+wet-path LPF with documented cutoff selections. Exact filter/distortion/cabinet
+curves are still approximate; demo timbre parity is not established. DX adds
+note/velocity limits, sostenuto with sustain/reset interaction, and Omni-mode
+All Notes Off handling. Velocity-depth/offset curves and receive switches are
+not guessed. Existing engine gains are unchanged.
+
 The user guide is [README.html](README.html). This repository contains wrapper
 and worker source only. Its MU2000 engine is the
 [Mu2026 S-MU2000 fork](https://github.com/OnjLouis/mu2026-smu-engine) of
@@ -29,7 +113,7 @@ DLL. These are the settings used in the Foobar performance and gain checks.
 
 ## First-pass verification
 
-- Twenty-five focused CTest cases pass, including firmware-mode selection,
+- Twenty-seven focused CTest cases pass, including firmware-mode selection,
   rejection cleanup, and pre-bank VL controller setup with ROM-free mocks.
 - MU dry, reverb, chorus, variation, and all four insertions process injected
   audio at 44.1 and 48 kHz in the child probe.

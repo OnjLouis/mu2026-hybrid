@@ -1,0 +1,18 @@
+Native FM core: Music Synthesizer for Android (MSFA).
+Copyright 2012-2013 Google Inc. Apache License 2.0; see LICENSE.
+https://github.com/google/music-synthesizer-for-android
+Pinned revision: f67d41d313b7dc85f6fb99e79e515cc9d208cfff
+
+Onj Research preview changes: clear feedback history for recycled notes;
+accept host-supplied pitch range/fine tuning rather than a fixed three-semitone
+pitch bend. The surrounding voice-bank loader, MIDI scheduling and MU routing
+are new preview code. This does not emulate a Yamaha CPU or execute its ROM.
+Yamaha voice parameters are external assets, not part of this source tree.
+
+Local integration adds the documented operator-enable mask to voice rendering.
+Pitch mappings and controller handling are implemented in the surrounding
+wrapper; unmodified default FM output scale is retained.
+
+Preview 0.0.2 adds bounded native PLG carrier/modulator level and feedback
+offsets to held notes. Carrier classification follows MSFA's existing algorithm
+table. Zero offsets preserve the previous FM path; output gain is unchanged.

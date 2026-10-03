@@ -28,6 +28,15 @@ int main()
     passed &= expect(router.routeShortMessage(message(0x90, 60, 100))
                          == hybrid::MidiDestination::xg,
                      "ordinary note is routed to XG");
+    passed &= expect(router.hasHeldXgNote(0, 60), "MU note ownership retained");
+    passed &= expect(!router.hasHeldXgNote(0, 61), "DX-only note has no MU owner");
+    passed &= expect(!router.hasHeldXgNote(16, 60)
+                         && !router.hasHeldXgNote(0, 128), "ownership lookup is bounded");
+    (void)router.routeShortMessage(message(0xb0, 0, 83));
+    passed &= expect(router.hasHeldXgNote(0, 60), "bank switch retains MU note owner");
+    (void)router.routeShortMessage(message(0x90, 60, 0));
+    passed &= expect(!router.hasHeldXgNote(0, 60), "zero-velocity note releases owner");
+    router.reset();
 
     passed &= expect(router.observeShortMessage(message(0xb1, 0, 81)),
                      "VL MSB enters routing on channel 2");

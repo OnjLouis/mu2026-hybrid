@@ -1,4 +1,6 @@
 #include "GsEffectTranslator.h"
+#include "DxEngine.h"
+#include "AnEngine.h"
 #include "HybridEditor.h"
 #include "HybridStatus.h"
 #include "MidiRouter.h"
@@ -63,7 +65,7 @@ constexpr std::size_t vlOutputBusCount = vlSignalBusCount + 6;
 constexpr std::size_t muInputBusCount = 16;
 constexpr std::size_t renderQuantumFrames = 512;
 constexpr std::int32_t hybridUniqueId = 0x4d323648; // "M26H"
-constexpr std::int32_t hybridVendorVersion = 103;
+constexpr std::int32_t hybridVendorVersion = 201;
 constexpr char hybridEffectName[] = "Mu2026 Hybrid";
 constexpr char hybridVendorName[] = "Onj Research";
 
@@ -72,12 +74,14 @@ constexpr hybrid::HybridEditorConfig editorConfig {
     L"Mu2026 Hybrid",
     L"MU2000",
     L"2006LE",
+    L"DX: banks 35, 67, 83 and 99 use recovered six-operator FM voices.\r\n"
+    L"This is not a complete PLG150-DX hardware emulator.\r\n"
     L"1. SG claims note events for channels in its native route mask.\r\n"
     L"2. Bank MSB 33, 81, or 97 selects VL/PVL.\r\n"
     L"3. MU2000 supplies the main voice set.\r\n"
     L"4. MU2000 gaps may use S-YXG2006LE voices.\r\n"
-    L"5. 2006LE, VL, and SG audio enters MU2000 effects, including "
-    L"insertion 2 when its assigned part can be isolated."
+    L"5. DX, 2006LE, VL, and SG audio enters MU2000 effects, including "
+    L"all four insertions when the assigned part can be isolated."
 };
 
 vst2::IntPtr writeVstString(void* destination, const char* text,
@@ -183,6 +187,7 @@ struct WrapperState {
     hybrid::GsEffectTranslator gsEffectTranslator;
     hybrid::XgVariationRouting variationRouting;
     hybrid::MuInsertionRouting insertionRouting;
+    hybrid::MuVariationInsertionMirror variationMirror;
     bool insertionEffectEnabled {};
     hybrid::XgPartModes childPartModes;
     hybrid::HybridStatus status;
@@ -219,6 +224,10 @@ struct WrapperState {
     std::vector<float> nativeOutputBuses;
     std::size_t nativeOutputCapacityFrames {};
     std::unique_ptr<hybrid::XglEngine> xgl;
+    std::unique_ptr<hybrid::DxEngine> dx;
+    std::vector<float> dxOutputBuses;
+    std::unique_ptr<hybrid::AnEngine> an;
+    std::vector<float> anOutputBuses;
     std::unique_ptr<hybrid::MuVoiceCatalog> muVoiceCatalog;
     std::vector<float> xglOutputBuses;
     std::vector<float> muInputBuses;
@@ -265,6 +274,10 @@ void configureAudioBuffers(WrapperState& wrapper,
     wrapper.xglOutputBuses.assign(
         wrapper.vlOutputCapacityFrames * hybrid::XglEngine::busCount, 0.0f);
     wrapper.muInputBuses.assign(
+        wrapper.vlOutputCapacityFrames * muInputBusCount, 0.0f);
+    wrapper.dxOutputBuses.assign(
+        wrapper.vlOutputCapacityFrames * muInputBusCount, 0.0f);
+    wrapper.anOutputBuses.assign(
         wrapper.vlOutputCapacityFrames * muInputBusCount, 0.0f);
 }
 
@@ -1107,6 +1120,27 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                     (packed >> 8) & 0x7f);
                 const auto value = static_cast<std::uint8_t>(
                     (packed >> 16) & 0x7f);
+                const bool sgOwnsDxCandidate = wrapper.sg.client != nullptr
+                    && wrapper.sg.started && isNoteOn(packed)
+                    && hybrid::sgOwnsNote(packed, wrapper.sg.routeMask);
+                const bool anOwnedRelease = wrapper.an != nullptr && isNoteOff(packed)
+                    && wrapper.an->heldNote(channel, midiNote(packed));
+                if (wrapper.an != nullptr && !sgOwnsDxCandidate) {
+                    const auto frame = wrapper.sgTimelineFrames
+                        + static_cast<std::uint64_t>(std::max(0, midi->deltaFrames));
+                    if (wrapper.an->queueShort(packed, frame)) {
+                        wrapper.status.observeShortMessage(packed, false, false, false, false, true);
+                        continue;
+                    }
+                }
+                if (wrapper.dx != nullptr && !sgOwnsDxCandidate) {
+                    const auto frame = wrapper.sgTimelineFrames
+                        + static_cast<std::uint64_t>(std::max(0, midi->deltaFrames));
+                    if (wrapper.dx->queueShort(packed, frame)) {
+                        wrapper.status.observeShortMessage(packed, false, false, false, true);
+                        continue;
+                    }
+                }
                 if (operation == 0xb0 && controller == 0) {
                     if (const auto change = wrapper.childPartModes.selectBankMsb(
                             channel, value)) {
@@ -1123,6 +1157,12 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                 const auto eventFrame = wrapper.sgTimelineFrames
                     + static_cast<std::uint64_t>(
                         std::max(0, midi->deltaFrames));
+                const bool dxReleaseWithoutMuNote = wrapper.dx != nullptr
+                    && wrapper.dx->selected(channel) && isNoteOff(packed)
+                    && !wrapper.router.hasHeldXgNote(channel, midiNote(packed));
+                const bool anReleaseWithoutMuNote = wrapper.an != nullptr
+                    && (anOwnedRelease || wrapper.an->selected(channel)) && isNoteOff(packed)
+                    && !wrapper.router.hasHeldXgNote(channel, midiNote(packed));
                 const auto destination = wrapper.router.routeShortMessage(packed);
                 const bool sgOwnsCurrentNote = wrapper.sg.client != nullptr
                     && wrapper.sg.started
@@ -1301,10 +1341,16 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                 }
                 const bool sgChannel = (wrapper.sg.routeMask
                     & (std::uint32_t {1} << channel)) != 0;
+                // Zero-velocity DX note-offs must not create phantom MU voices.
+                // Only forward them when a pre-switch MU/fallback note needs release.
+                if (dxReleaseWithoutMuNote || anReleaseWithoutMuNote)
+                    sendToChild = false;
                 wrapper.status.observeShortMessage(
                     packed, wrapper.router.isVlChannel(channel), sgChannel,
                     wrapper.xgl != nullptr
-                        && wrapper.xgl->selectedVoice(channel));
+                        && wrapper.xgl->selectedVoice(channel),
+                    wrapper.dx != nullptr && wrapper.dx->selected(channel),
+                    wrapper.an != nullptr && wrapper.an->selected(channel));
             } else if (event != nullptr && event->type == 6) {
                 const auto* sysex = reinterpret_cast<const vst2::SysexEvent*>(event);
                 if (sysex->sysexDump != nullptr && sysex->dumpBytes > 0) {
@@ -1312,15 +1358,24 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                         reinterpret_cast<const std::uint8_t*>(sysex->sysexDump),
                         static_cast<std::size_t>(sysex->dumpBytes),
                     };
+                    if (wrapper.dx != nullptr)
+                        wrapper.dx->queueSysex(bytes, wrapper.sgTimelineFrames
+                            + static_cast<std::uint64_t>(std::max(0, sysex->deltaFrames)));
+                    if (wrapper.an != nullptr)
+                        wrapper.an->queueSysex(bytes, wrapper.sgTimelineFrames
+                            + static_cast<std::uint64_t>(std::max(0, sysex->deltaFrames)));
                     const bool pluginVoiceBulk =
                         hybrid::VlPluginVoiceBulk::isModel64Bulk(bytes);
                     const auto pluginVoice =
                         wrapper.vlPluginVoiceBulk.observe(bytes);
-                    if (pluginVoiceBulk
+                    const bool dxPluginVoice = pluginVoice && wrapper.dx != nullptr
+                        && (pluginVoice->bankMsb == 35 || pluginVoice->bankMsb == 67
+                            || pluginVoice->bankMsb == 83 || pluginVoice->bankMsb == 99);
+                    if (pluginVoiceBulk && !dxPluginVoice
                         && wrapper.router.selectVlChannel(0)) {
                         activateNativeVlBulkChannel(wrapper);
                     }
-                    if (pluginVoice)
+                    if (pluginVoice && !dxPluginVoice)
                         applyPluginVoice(wrapper, *pluginVoice,
                                          sysex->deltaFrames);
                     const auto eventFrame = wrapper.sgTimelineFrames
@@ -1333,6 +1388,7 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                         wrapper.gsEffectTranslator.reset();
                         wrapper.variationRouting.reset();
                         wrapper.insertionRouting.reset();
+                        wrapper.variationMirror.reset();
                         wrapper.insertionEffectEnabled = false;
                         resetVlPlaybackState(wrapper);
                         wrapper.status.reset(displayReset(systemReset));
@@ -1354,7 +1410,7 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                             || bytes[8] != 0;
                     }
                     if (const auto insertion =
-                            hybrid::muInsertionForVariation(bytes)) {
+                            wrapper.variationMirror.observe(bytes)) {
                         if (retainGsEffectSysex(
                                 wrapper,
                                 std::span(insertion->bytes.data(),
@@ -1394,7 +1450,7 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                                         effectType, sysex->deltaFrames);
                             }
                             if (const auto insertion =
-                                    hybrid::muInsertionForVariation(effectType)) {
+                                    wrapper.variationMirror.observe(effectType)) {
                                 if (retainGsEffectSysex(
                                         wrapper,
                                         std::span(insertion->bytes.data(),
@@ -1872,6 +1928,14 @@ std::array<float*, muInputBusCount> prepareMuInputBuses(
             == hybrid::XgVariationConnection::insertion
         && wrapper.variationRouting.assignedPart().has_value()
         && wrapper.insertionEffectEnabled;
+    if (wrapper.dx != nullptr)
+        wrapper.dx->render(wrapper.dxOutputBuses.data(),
+            static_cast<unsigned>(wrapper.vlOutputCapacityFrames),
+            static_cast<unsigned>(frames));
+    if (wrapper.an != nullptr)
+        wrapper.an->render(wrapper.anOutputBuses.data(),
+            static_cast<unsigned>(wrapper.vlOutputCapacityFrames),
+            static_cast<unsigned>(frames));
     for (std::size_t bus = 0; bus < muInputBusCount; ++bus) {
         auto* destination = wrapper.muInputBuses.data()
             + bus * wrapper.vlOutputCapacityFrames;
@@ -1890,7 +1954,11 @@ std::array<float*, muInputBusCount> prepareMuInputBuses(
             destination[frame] = (native * wrapper.nativeOutputGain
                 + (renderedXgl && bus < hybrid::XglEngine::busCount
                     ? xglBus(wrapper, bus)[frame] * wrapper.xglOutputGain
-                    : 0.0f))
+                    : 0.0f)
+                + (wrapper.dx != nullptr ? wrapper.dxOutputBuses[
+                    bus * wrapper.vlOutputCapacityFrames + frame] : 0.0f)
+                + (wrapper.an != nullptr ? wrapper.anOutputBuses[
+                    bus * wrapper.vlOutputCapacityFrames + frame] : 0.0f))
                 * muFxInputCompensation;
         }
     }
@@ -1935,6 +2003,10 @@ vst2::IntPtr dispatch(vst2::AEffect* effect, std::int32_t opcode,
             configureVl(*wrapper, option);
         if (opcode == vst2::setSampleRate && wrapper->xgl != nullptr)
             wrapper->xgl->setSampleRate(option);
+        if (opcode == vst2::setSampleRate && wrapper->dx != nullptr)
+            wrapper->dx->setSampleRate(option);
+        if (opcode == vst2::setSampleRate && wrapper->an != nullptr)
+            wrapper->an->setSampleRate(option);
         if (opcode == vst2::setBlockSize && value > 0) {
             try {
                 configureAudioBuffers(*wrapper,
@@ -2139,6 +2211,23 @@ extern "C" __declspec(dllexport) vst2::AEffect* VSTPluginMain(
     wrapperState->status.setSampleRate(static_cast<std::uint32_t>(
         std::max(1.0f, std::round(initialRate))));
     wrapperState->muVoiceCatalog = std::move(catalog);
+    if (std::filesystem::is_regular_file(directory / L"plg-an-voices.bin")) {
+        try {
+            wrapperState->an = std::make_unique<hybrid::AnEngine>(directory / L"plg-an-voices.bin");
+            wrapperState->an->setSampleRate(initialRate);
+        } catch (const std::exception& error) {
+            reportVlFailure("AN bank initialization failure", error.what());
+        }
+    }
+    if (std::filesystem::is_regular_file(directory / L"plg-dx-voices.bin")) {
+        try {
+            wrapperState->dx = std::make_unique<hybrid::DxEngine>(
+                directory / L"plg-dx-voices.bin");
+            wrapperState->dx->setSampleRate(initialRate);
+        } catch (const std::exception& error) {
+            reportVlFailure("DX bank initialization failure", error.what());
+        }
+    }
     if (std::filesystem::is_regular_file(xglEnginePath)
         && std::filesystem::is_regular_file(xglBankPath)
         && std::filesystem::is_regular_file(xglDataPath)) {

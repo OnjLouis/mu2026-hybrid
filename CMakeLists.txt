@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(Mu2026Hybrid VERSION 0.1.3 LANGUAGES CXX)
+project(Mu2026Hybrid VERSION 0.2.1 LANGUAGES CXX)
 
 if(NOT WIN32 OR CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "Mu2026 Hybrid currently requires a 32-bit Windows target")
@@ -9,6 +9,26 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_library(DxFm STATIC
+    Source/DxEngine.cpp Source/MidiSystemReset.cpp Source/XgVariationRouting.cpp
+    ThirdParty/msfa/dx7note.cc ThirdParty/msfa/env.cc ThirdParty/msfa/exp2.cc
+    ThirdParty/msfa/fm_core.cc ThirdParty/msfa/fm_op_kernel.cc
+    ThirdParty/msfa/freqlut.cc ThirdParty/msfa/lfo.cc ThirdParty/msfa/log2.cc
+    ThirdParty/msfa/patch.cc ThirdParty/msfa/pitchenv.cc ThirdParty/msfa/sin.cc)
+target_include_directories(DxFm PUBLIC Source PRIVATE ThirdParty/msfa)
+target_compile_options(DxFm PRIVATE -fwrapv)
+target_compile_definitions(DxFm PRIVATE _USE_MATH_DEFINES)
+
+add_library(AnSynth STATIC Source/AnEngine.cpp Source/MidiSystemReset.cpp Source/XgVariationRouting.cpp)
+target_include_directories(AnSynth PUBLIC Source)
+add_executable(AnEngineTests Tests/AnEngineTests.cpp)
+target_link_libraries(AnEngineTests PRIVATE AnSynth)
+target_link_options(AnEngineTests PRIVATE -static -static-libgcc -static-libstdc++)
+
+add_executable(DxEngineTests Tests/DxEngineTests.cpp)
+target_link_libraries(DxEngineTests PRIVATE DxFm)
+target_link_options(DxEngineTests PRIVATE -static -static-libgcc -static-libstdc++)
 
 add_library(Mu2026Hybrid SHARED
     Source/HybridEditor.cpp
@@ -64,7 +84,7 @@ target_compile_definitions(Mu2026Hybrid PRIVATE
     WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE
 )
 target_link_libraries(Mu2026Hybrid PRIVATE
-    comctl32 user32 gdi32 oleacc ole32 uuid
+    comctl32 user32 gdi32 oleacc ole32 uuid DxFm AnSynth
 )
 target_link_options(Mu2026Hybrid PRIVATE -static -static-libgcc -static-libstdc++)
 
@@ -150,6 +170,7 @@ target_link_options(HybridEditorHostProbe PRIVATE
 )
 
 enable_testing()
+add_test(NAME DxEngineTests COMMAND DxEngineTests)
 
 add_library(MockMuEngine SHARED Tests/MockMuEngine.cpp)
 target_link_options(MockMuEngine PRIVATE -static -static-libgcc -static-libstdc++)
@@ -463,3 +484,12 @@ target_link_options(HybridControllerSetupProbe PRIVATE -static -static-libgcc -s
 add_dependencies(HybridControllerSetupProbe Mu2026Hybrid MockMuEngine NativeWorkerStub)
 add_test(NAME HybridControllerSetupProbe COMMAND HybridControllerSetupProbe
     $<TARGET_FILE:Mu2026Hybrid> $<TARGET_FILE:MockMuEngine> $<TARGET_FILE:NativeWorkerStub>)
+
+# Preview validation must retain assertions even in an optimized audio build.
+add_test(NAME AnEngineTests COMMAND AnEngineTests)
+get_property(previewTargets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+foreach(previewTarget IN LISTS previewTargets)
+    if(previewTarget MATCHES "Tests$")
+        target_compile_options(${previewTarget} PRIVATE -UNDEBUG)
+    endif()
+endforeach()

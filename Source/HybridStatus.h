@@ -12,6 +12,8 @@ enum class DisplayEngine : std::uint8_t {
     vl,
     sg,
     le,
+    dx,
+    an,
 };
 
 enum class WorkerDisplayState : std::uint8_t {
@@ -71,7 +73,8 @@ public:
     HybridStatus() noexcept;
 
     void observeShortMessage(std::uint32_t packedMessage, bool vlChannel,
-                             bool sgChannel, bool leChannel = false) noexcept;
+                             bool sgChannel, bool leChannel = false,
+                             bool dxChannel = false, bool anChannel = false) noexcept;
     void reset(ResetDisplayState resetState) noexcept;
 
     void setAvailability(bool vlAvailable, bool sgAvailable) noexcept;
@@ -96,6 +99,8 @@ private:
         ChannelStatusSnapshot value {};
         std::array<std::uint16_t, 128> heldNotes {};
         bool leChannel {};
+        bool dxChannel {};
+        bool anChannel {};
     };
 
     struct PublishedChannel {
@@ -105,7 +110,8 @@ private:
     };
 
     static DisplayEngine routeEngine(std::uint8_t bankMsb, bool vlChannel,
-                                     bool sgChannel, bool leChannel) noexcept;
+                                     bool sgChannel, bool leChannel,
+                                     bool dxChannel, bool anChannel) noexcept;
     static HybridStatus& sharedStatus() noexcept;
     void applySnapshot(const HybridStatusSnapshot& snapshot) noexcept;
     void publishChannel(std::size_t channel) noexcept;

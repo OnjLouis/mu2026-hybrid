@@ -41,6 +41,8 @@ const wchar_t* engineName(DisplayEngine engine,
     case DisplayEngine::vl: return L"VL/PVL";
     case DisplayEngine::sg: return L"SG";
     case DisplayEngine::le: return L"2006LE";
+    case DisplayEngine::dx: return L"DX";
+    case DisplayEngine::an: return L"AN (native approximation)";
     default: return standardEngineName;
     }
 }

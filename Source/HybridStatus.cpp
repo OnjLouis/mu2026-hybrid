@@ -63,10 +63,15 @@ HybridStatus& HybridStatus::sharedStatus() noexcept
 DisplayEngine HybridStatus::routeEngine(std::uint8_t bankMsb,
                                         bool vlChannel,
                                         bool sgChannel,
-                                        bool leChannel) noexcept
+                                        bool leChannel,
+                                        bool dxChannel, bool anChannel) noexcept
 {
     if (sgChannel)
         return DisplayEngine::sg;
+    if (anChannel)
+        return DisplayEngine::an;
+    if (dxChannel)
+        return DisplayEngine::dx;
     if (vlChannel || bankMsb == 33 || bankMsb == 81 || bankMsb == 97)
         return DisplayEngine::vl;
     return leChannel ? DisplayEngine::le : DisplayEngine::mu;
@@ -75,7 +80,8 @@ DisplayEngine HybridStatus::routeEngine(std::uint8_t bankMsb,
 void HybridStatus::observeShortMessage(std::uint32_t packedMessage,
                                        bool vlChannel,
                                        bool sgChannel,
-                                       bool leChannel) noexcept
+                                       bool leChannel,
+                                       bool dxChannel, bool anChannel) noexcept
 {
     const auto status = static_cast<std::uint8_t>(packedMessage & 0xff);
     if (status < 0x80 || status >= 0xf0)
@@ -131,8 +137,10 @@ void HybridStatus::observeShortMessage(std::uint32_t packedMessage,
     }
 
     channel.leChannel = leChannel;
+    channel.dxChannel = dxChannel;
+    channel.anChannel = anChannel;
     channel.value.engine = routeEngine(channel.value.bankMsb, vlChannel,
-                                       sgChannel, leChannel);
+                                       sgChannel, leChannel, dxChannel, anChannel);
     publishChannel(channelIndex);
 }
 
@@ -391,7 +399,7 @@ void HybridStatus::refreshEngineRoutes() noexcept
         const auto bank = channels[index].value.bankMsb;
         channels[index].value.engine = routeEngine(
             bank, bank == 33 || bank == 81 || bank == 97, sgChannel,
-            channels[index].leChannel);
+            channels[index].leChannel, channels[index].dxChannel, channels[index].anChannel);
         publishChannel(index);
     }
 }

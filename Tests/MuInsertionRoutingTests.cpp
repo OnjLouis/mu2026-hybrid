@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <stdexcept>
 
 int main()
 {
@@ -27,6 +28,17 @@ int main()
         0xf0, 0x43, 0x10, 0x4c, 0x02, 0x01, 0x5a, 0x00, 0xf7,
     };
     assert(!hybrid::muInsertionForVariation(connection));
+
+    hybrid::MuVariationInsertionMirror mirror;
+    if (!mirror.observe(type)) throw std::runtime_error("Legacy variation bridge missing");
+    auto native = type;
+    native[4] = 3; native[5] = 0; native[6] = 0;
+    if (mirror.observe(native) || mirror.observe(type) || mirror.observe(part))
+        throw std::runtime_error("Variation overwrote native insertion 1");
+    mirror.reset();
+    native[5] = 1;
+    mirror.observe(native);
+    if (!mirror.observe(type)) throw std::runtime_error("Insertion 2 blocked legacy variation");
 
     hybrid::MuInsertionRouting insertions;
     constexpr std::array<std::uint8_t, 10> distortion {

@@ -18,6 +18,15 @@ std::uint32_t message(std::uint8_t operation, std::uint8_t channel,
 int main()
 {
     hybrid::HybridStatus status;
+    status.observeShortMessage(message(0xb0, 0, 0, 83), false, false);
+    assert(status.snapshot().channels[0].engine == hybrid::DisplayEngine::mu);
+    status.observeShortMessage(message(0xc0, 0, 5), false, false, false, true);
+    assert(status.snapshot().channels[0].engine == hybrid::DisplayEngine::dx);
+    status.setSgRouteMask(1);
+    assert(status.snapshot().channels[0].engine == hybrid::DisplayEngine::sg);
+    status.setSgRouteMask(0);
+    assert(status.snapshot().channels[0].engine == hybrid::DisplayEngine::dx);
+    status.reset(hybrid::ResetDisplayState::xg);
     status.setSupplementalEngineAvailable(true);
     assert(status.snapshot().supplementalEngineAvailable);
     auto snapshot = status.snapshot();
@@ -119,5 +128,9 @@ int main()
     snapshot = activeEditorStatus.displaySnapshot();
     assert(!snapshot.latestPlaybackInstance);
     assert(snapshot.channels[5].program == 9);
+    activeEditorStatus.observeShortMessage(message(0x90, 1, 60, 100), false, false, false, false, true);
+    assert(activeEditorStatus.snapshot().channels[1].engine == hybrid::DisplayEngine::an);
+    activeEditorStatus.setSgRouteMask(0);
+    assert(activeEditorStatus.snapshot().channels[1].engine == hybrid::DisplayEngine::an);
     return 0;
 }

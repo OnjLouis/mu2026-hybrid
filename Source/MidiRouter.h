@@ -17,6 +17,8 @@ public:
         std::uint32_t packedMessage);
     [[nodiscard]] bool observeShortMessage(std::uint32_t packedMessage);
     [[nodiscard]] bool isVlChannel(std::uint8_t channel) const;
+    [[nodiscard]] bool hasHeldXgNote(std::uint8_t channel,
+                                   std::uint8_t note) const noexcept;
     [[nodiscard]] bool selectVlChannel(std::uint8_t channel) noexcept;
     void reset();
 

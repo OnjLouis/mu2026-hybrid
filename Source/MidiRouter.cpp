@@ -91,6 +91,13 @@ bool MidiRouter::isVlChannel(std::uint8_t channel) const
     return channel < bankMsb.size() && isVlBank(bankMsb[channel]);
 }
 
+bool MidiRouter::hasHeldXgNote(std::uint8_t channel,
+                              std::uint8_t note) const noexcept
+{
+    return channel < heldXgNotes.size() && note < heldXgNotes[channel].size()
+        && heldXgNotes[channel][note] != 0;
+}
+
 bool MidiRouter::selectVlChannel(std::uint8_t channel) noexcept
 {
     if (channel >= bankMsb.size())

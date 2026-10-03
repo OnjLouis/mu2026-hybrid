@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -95,6 +96,29 @@ private:
         std::optional<std::uint8_t> part;
     };
     std::array<Assignment, 3> assignments {};
+};
+
+// Legacy XG insertion variation uses MU insertion 1 as a bridge, but an
+// explicitly configured MU insertion must remain independent of variation.
+class MuVariationInsertionMirror {
+public:
+    void reset() noexcept { nativeInsertionOne = false; }
+
+    std::optional<MuInsertionMessage> observe(
+        std::span<const std::uint8_t> sysex) noexcept
+    {
+        if (sysex.size() >= 9 && sysex.front() == 0xf0
+            && sysex.back() == 0xf7 && sysex[1] == 0x43
+            && (sysex[2] & 0xf0) == 0x10 && sysex[3] == 0x4c
+            && sysex[4] == 3 && sysex[5] == 0
+            && std::none_of(sysex.begin()+1, sysex.end()-1,
+                [](auto b) { return b > 127; }))
+            nativeInsertionOne = true;
+        return nativeInsertionOne ? std::nullopt : muInsertionForVariation(sysex);
+    }
+
+private:
+    bool nativeInsertionOne {};
 };
 
 } // namespace hybrid
