@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(Mu2026Hybrid VERSION 0.2.1 LANGUAGES CXX)
+project(Mu2026Hybrid VERSION 0.2.2 LANGUAGES CXX)
 
 if(NOT WIN32 OR CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "Mu2026 Hybrid currently requires a 32-bit Windows target")

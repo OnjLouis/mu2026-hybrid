@@ -4,7 +4,7 @@ Mu2026 Hybrid is a separate 32-bit VST2 wrapper over a modified S-MU2000
 engine. It uses MU2000 voices first, S-YXG2006LE only for detected MU voice
 gaps, and the existing native VL/PVL and SG workers. It does not load XG50.
 
-Research prerelease 0.2.1 integrates native six-operator FM DX voices into the same
+Research prerelease 0.2.2 integrates native six-operator FM DX voices into the same
 Mu2026 VST identity. It is an opt-in preview, not a stable update. Recovered voice parameters
 are external, private assets; the Google MSFA core is Apache-2.0 with its
 license and modification notice under ThirdParty/msfa. See the HTML guide
@@ -99,7 +99,7 @@ This source does not include Yamaha ROMs, firmware, tables, VXDs, MIDI songs,
 or a local `roms.txt`. Users must provide the hardware-derived data from their
 own authorized sources. Do not upload these files to GitHub issues or releases.
 
-The [QWS](Definitions/QWS/Mu2026%20Hybrid.ini) and
+The [QWS](Definitions/QWS/inst_mu2026_hybrid.ini) and
 [Reaper](Definitions/Reaper/Mu2026%20Hybrid.reabank) definitions are included.
 The inherited MU definition also names PLG expansion voices; listing a voice
 does not prove that its optional expansion board is emulated.
@@ -136,6 +136,22 @@ This restores early volume, reverb, chorus and CC94 variation sends in the
 reported files without changing gains or replaying MU notes into VL. Controlled
 variation on/off comparisons differ at 44.1 and 48 kHz; local listening confirms
 the improvement. Exact physical-hardware effect parity still needs comparison.
+
+Version 0.2.2 forwards CC91/93/94 to MU for VL parts
+assigned to insertions 2-4, including controller values received before a late
+insertion assignment. System effects receive the processed insertion output,
+without duplicate unprocessed worker sends. Non-inserted parts keep their
+existing path and VL gain is unchanged. A previous small FatPizz variation
+on/off difference did not prove that its post-insertion delay was correct;
+FatPizz's restored delay is now confirmed by listening, while exact
+physical-hardware levels remain unverified.
+
+The matching MU engine incorporates upstream S-MU2000 through commit
+`67c550e5bc58110dd527a745083e4e8aa25af919` (merged pull request 121), including
+its sampler waveform synthesis and subsequent fixes. Sampler, resampler,
+ROM-directory, SysEx-memory and external-effects checks passed. This does not
+replace the approximate AN engine with hardware emulation, supply new ROMs,
+or establish screen-reader accessibility of the upstream sampler editor.
 
 Version 0.1.2 selects Yamaha's original firmware voice path at load, ignoring
 the older native=1 shortcut. This preserves MU voice/controller behaviour while

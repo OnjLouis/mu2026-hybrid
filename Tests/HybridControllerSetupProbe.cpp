@@ -20,13 +20,27 @@ vst2::IntPtr host(vst2::AEffect*, std::int32_t opcode, std::int32_t,
 }
 
 float render(vst2::EntryPoint entry, bool controlsFirst,
-             std::uint8_t controller, std::uint8_t send)
+             std::uint8_t controller, std::uint8_t send, int insertion = 0)
 {
     auto* effect = entry(host);
     if (!effect) return -1;
     effect->dispatcher(effect, vst2::open, 0, 0, nullptr, 0);
     effect->dispatcher(effect, vst2::setBlockSize, 0, 512, nullptr, 0);
     effect->dispatcher(effect, vst2::mainsChanged, 0, 1, nullptr, 0);
+    std::array<unsigned char, 10> type {0xf0, 0x43, 0x10, 0x4c, 3, 0, 0, 0x49, 0, 0xf7};
+    std::array<unsigned char, 9> part {0xf0, 0x43, 0x10, 0x4c, 3, 0, 0x0c, 0, 0xf7};
+    std::array<vst2::SysexEvent, 2> sysex {};
+    if (insertion) {
+        type[5] = part[5] = static_cast<unsigned char>(insertion - 1);
+        sysex[0].dumpBytes = type.size();
+        sysex[0].sysexDump = reinterpret_cast<char*>(type.data());
+        sysex[1].dumpBytes = part.size();
+        sysex[1].sysexDump = reinterpret_cast<char*>(part.data());
+        vst2::Events setup {2};
+        setup.events[0] = reinterpret_cast<vst2::Event*>(&sysex[0]);
+        setup.events[1] = reinterpret_cast<vst2::Event*>(&sysex[1]);
+        effect->dispatcher(effect, vst2::processEvents, 0, 0, &setup, 0);
+    }
     std::array<std::uint32_t, 5> messages {
         0xb0u | (std::uint32_t(controller) << 8) | (std::uint32_t(send) << 16),
         0x002100b0u, 0x000020b0u, 0x000040c0u, 0x00643c90u,
@@ -85,6 +99,18 @@ int main(int argc, char** argv)
             passed = passed && correct;
             std::printf("CC%d before/after VL bank: %.8g / %.8g; off %.8g: %s\n",
                         controllers[plane], before, after, off, correct ? "PASS" : "FAIL");
+        }
+        for (int insertion = 2; insertion <= 4; ++insertion) {
+            select(10 + (insertion - 2) * 2);
+            const float dry = render(entry, false, 7, 77, insertion);
+            bool correct = dry > 0;
+            for (std::size_t plane = 1; plane < controllers.size(); ++plane) {
+                select(static_cast<int>(plane * 2));
+                correct &= render(entry, false, controllers[plane], 77, insertion) == 0;
+            }
+            passed &= correct;
+            std::printf("Insertion %d receives dry without duplicate pre-insertion sends: %s\n",
+                        insertion, correct ? "PASS" : "FAIL");
         }
     }
     if (module) FreeLibrary(module);

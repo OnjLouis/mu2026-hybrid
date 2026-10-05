@@ -83,7 +83,7 @@ $Products = @(
     }
 )
 
-$AllowedProductFiles = @("README.html", "TESTER-NOTES.md", "Mu2026 Hybrid.ini", "Mu2026 Hybrid.reabank")
+$AllowedProductFiles = @("README.html", "TESTER-NOTES.md", "Mu2026 Hybrid.ini", "inst_mu2026_hybrid.ini", "Mu2026 Hybrid.reabank")
 $AllowedUpdaterFiles = @("Update Yamaha Hybrids.cmd", "Update-YamahaHybrids.ps1")
 $ScriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $StateRoot = Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) "Onj Research\Yamaha Hybrid Updater"

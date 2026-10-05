@@ -1,4 +1,4 @@
-# Mu2026 Hybrid 0.2.1 research prerelease
+# Mu2026 Hybrid 0.2.2 research prerelease
 
 This opt-in preview adds native DX and an approximate AN engine to the existing
 32-bit Windows VST2 instrument. Stable 0.1.3 remains available and the signed
@@ -7,6 +7,14 @@ the same VST identity, so choose the preview explicitly in your host.
 
 ## Findings so far
 
+- FatPizz's VL post-insertion system delay is restored without increasing gain.
+  MU now receives the assigned VL part's CC91/93/94 values, including values
+  sent before a later insertion assignment. Worker sends are not duplicated.
+  Insertions 2-4 were checked at 44.1 and 48 kHz, and local listening confirmed
+  the delay. Shellshk, ForYou and SG_yuki regression renders were unchanged.
+- The matching engine includes upstream sampler synthesis and fixes through
+  merged pull request 121. It does not make AN hardware-equivalent; the
+  upstream sampler editor has not received a screen-reader acceptance test.
 - Trance's opening is closer to its hardware recording after restoring the
   HardNoiz preset's eight-step voice pattern. Previously only the incoming
   held note played.

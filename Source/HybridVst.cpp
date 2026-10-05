@@ -47,6 +47,9 @@ constexpr std::size_t maxPendingSgEvents = 512;
 constexpr std::size_t maxVlSetupEvents = 1024;
 constexpr std::size_t maxVlSetupSysexBytes = 65'536;
 constexpr std::size_t midiChannelCount = 16;
+constexpr std::uint8_t reverbSendController = 91;
+constexpr std::uint8_t chorusSendController = 93;
+constexpr std::uint8_t variationSendController = 94;
 constexpr std::size_t maxVlVoices = 8;
 // The legacy XG engine replaces, rather than appends, its pending VST event
 // list. Keep dense setup bursts intact in one dispatcher call.
@@ -65,7 +68,7 @@ constexpr std::size_t vlOutputBusCount = vlSignalBusCount + 6;
 constexpr std::size_t muInputBusCount = 16;
 constexpr std::size_t renderQuantumFrames = 512;
 constexpr std::int32_t hybridUniqueId = 0x4d323648; // "M26H"
-constexpr std::int32_t hybridVendorVersion = 201;
+constexpr std::int32_t hybridVendorVersion = 202;
 constexpr char hybridEffectName[] = "Mu2026 Hybrid";
 constexpr char hybridVendorName[] = "Onj Research";
 
@@ -1069,8 +1072,9 @@ bool retainGsEffectSysex(WrapperState& wrapper,
     return true;
 }
 
-bool retainGsEffectSend(WrapperState& wrapper, std::size_t part, bool enabled,
-                        std::int32_t deltaFrames, bool forceNew)
+bool retainChildController(WrapperState& wrapper, std::size_t part,
+                           std::uint8_t controller, std::uint8_t value,
+                           std::int32_t deltaFrames, bool forceNew)
 {
     if (wrapper.syntheticGsEffectEventCount
         == wrapper.syntheticGsEffectMidiEvents.size()) {
@@ -1081,10 +1085,17 @@ bool retainGsEffectSend(WrapperState& wrapper, std::size_t part, bool enabled,
     event = {};
     event.deltaFrames = deltaFrames;
     event.midiData[0] = static_cast<char>(0xb0 | part);
-    event.midiData[1] = 94;
-    event.midiData[2] = static_cast<char>(enabled ? 127 : 0);
+    event.midiData[1] = static_cast<char>(controller);
+    event.midiData[2] = static_cast<char>(value);
     retainChildEvent(wrapper, reinterpret_cast<vst2::Event*>(&event), forceNew);
     return true;
+}
+
+bool retainGsEffectSend(WrapperState& wrapper, std::size_t part, bool enabled,
+                        std::int32_t deltaFrames, bool forceNew)
+{
+    return retainChildController(wrapper, part, variationSendController,
+                                 enabled ? 127 : 0, deltaFrames, forceNew);
 }
 
 void clearChildEvents(WrapperState& wrapper)
@@ -1167,7 +1178,14 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                 const bool sgOwnsCurrentNote = wrapper.sg.client != nullptr
                     && wrapper.sg.started
                     && hybrid::sgOwnsNote(packed, wrapper.sg.routeMask);
-                sendToChild = destination != hybrid::MidiDestination::vl;
+                // MU firmware needs the part's sends to route insertion output
+                // into its system effects, even when a worker owns the notes.
+                const bool muEffectSend = operation == 0xb0
+                    && (controller == reverbSendController
+                        || controller == chorusSendController
+                        || controller == variationSendController);
+                sendToChild = destination != hybrid::MidiDestination::vl
+                    || (muEffectSend && wrapper.insertionRouting.targetFor(channel));
                 if (destination != hybrid::MidiDestination::vl
                     && wrapper.xgl != nullptr
                     && !(sgOwnsCurrentNote && isNoteOn(packed))) {
@@ -1400,7 +1418,29 @@ vst2::IntPtr processEvents(WrapperState& wrapper, const vst2::Events* events)
                     }
                     (void)wrapper.childPartModes.observe(bytes);
                     wrapper.variationRouting.observe(bytes);
+                    const auto previousInsertions = wrapper.insertionRouting;
                     wrapper.insertionRouting.observe(bytes);
+                    for (std::uint8_t channel = 0; channel < midiChannelCount; ++channel) {
+                        const auto target = wrapper.insertionRouting.targetFor(channel);
+                        if (!target || target == previousInsertions.targetFor(channel)
+                            || !wrapper.router.isVlChannel(channel)) {
+                            continue;
+                        }
+                        // An insertion may be assigned after the part's sends.
+                        // Restore only those sends, not banks, programs or notes.
+                        wrapper.vlChannelSnapshots[channel].replay([&](std::uint32_t message) {
+                            const auto controller = static_cast<std::uint8_t>((message >> 8) & 0x7f);
+                            if ((message & 0xf0) == 0xb0
+                                && (controller == reverbSendController
+                                    || controller == chorusSendController
+                                    || controller == variationSendController)
+                                && retainChildController(wrapper, channel, controller,
+                                       static_cast<std::uint8_t>((message >> 16) & 0x7f),
+                                       sysex->deltaFrames, firstChildEvent)) {
+                                firstChildEvent = false;
+                            }
+                        });
+                    }
                     if (bytes.size() == 10 && bytes[0] == 0xf0
                         && bytes[1] == 0x43 && (bytes[2] & 0xf0) == 0x10
                         && bytes[3] == 0x4c && bytes[4] == 0x02
@@ -1665,7 +1705,10 @@ void mixVlChannelBlock(WrapperState& wrapper, VlVoiceState& voice,
 {
     const auto insertion = wrapper.insertionRouting.targetFor(
         wrapper.vlVoiceAllocator.channel(voiceIndex));
-    for (std::size_t plane = 0; plane < hybrid::ipc::planeCount; ++plane) {
+    // Assigned insertions feed the system effects through MU's firmware mixer;
+    // also injecting the worker's pre-insertion sends would duplicate that path.
+    const auto planeCount = insertion ? 1u : hybrid::ipc::planeCount;
+    for (std::size_t plane = 0; plane < planeCount; ++plane) {
         const auto stereo = voice.client->plane(plane, frames);
         const auto bus = insertion && plane == 0
             ? vlSignalBusCount + (*insertion - 2) * 2 : plane * 2;
