@@ -1,12 +1,22 @@
 # Mu2026 Hybrid
 
+## Generate DX and AN Voice Banks
+
+The [Voice Bank Tools HTML guide](Tools/VoiceBankConverters/README.html) explains
+how to generate `plg-dx-voices.bin` and `plg-an-voices.bin` from separately
+supplied PLG150 firmware and Yamaha manuals. Download the data-free
+[Voice Bank Tools 1.0.0](https://github.com/OnjLouis/mu2026-hybrid/releases/tag/bank-tools-v1.0.0)
+for Windows and native Linux. Conversion needs Python, not Wine or PowerShell
+on Linux. Generated banks match the 0.2.2 preview; raw firmware cannot simply
+be renamed. This tool does not import arbitrary AN1x/AN200 voice files.
+
 Mu2026 Hybrid is a separate 32-bit VST2 wrapper over a modified S-MU2000
 engine. It uses MU2000 voices first, S-YXG2006LE only for detected MU voice
 gaps, and the existing native VL/PVL and SG workers. It does not load XG50.
 
 Research prerelease 0.2.2 integrates native six-operator FM DX voices into the same
 Mu2026 VST identity. It is an opt-in preview, not a stable update. Recovered voice parameters
-are external, private assets; the Google MSFA core is Apache-2.0 with its
+are separately supplied Yamaha-derived data; the Google MSFA core is Apache-2.0 with its
 license and modification notice under ThirdParty/msfa. See the HTML guide
 for supported controllers and remaining PLG150-DX compatibility gaps.
 

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mu2026 Voice Bank Tools 1.0.0</title>
+  <style>
+    body { max-width: 72rem; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, sans-serif; line-height: 1.6; color: #111; background: #fff; }
+    a { color: #0056a6; } table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #aaa; padding: .5rem; text-align: left; vertical-align: top; }
+    code, pre, td { overflow-wrap: anywhere; } pre { white-space: pre-wrap; padding: 1rem; background: #eee; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Mu2026 Voice Bank Tools</h1>
+  <p>Version 1.0.0. Build the external DX and AN factory voice banks used by the Mu2026 Hybrid 0.2.2 research preview. The converters are MIT-licensed source code; firmware, manuals and generated voice banks are not included.</p>
+  <nav aria-label="Guide sections"><a href="#inputs">Inputs</a> | <a href="#windows">Windows</a> | <a href="#linux">Linux and Wine</a> | <a href="#cli">Command line</a> | <a href="#format">Bank formats</a> | <a href="#limits">Limits</a></nav>
+  <h2 id="inputs">Required inputs</h2>
+  <p>Supply files you have appropriate rights to use. Hardware ownership alone is not represented here as permission to download or redistribute somebody else's dump. These are references to the resources discussed in <a href="https://github.com/OnjLouis/mu2026-hybrid/issues/4">issue 4</a>, not firmware hosted by this project.</p>
+  <table>
+    <caption>Supported firmware and matching Yamaha manuals</caption>
+    <thead><tr><th scope="col">Bank</th><th scope="col">Firmware</th><th scope="col">Manual</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">DX</th><td><a href="https://github.com/rgwan/fs1r_firmware_RE/blob/3716f46534ab4e2d59f5f3067fd663c9068c91c9/dmps/plg150-dx/PLG150-DX.BIN">PLG150-DX.BIN</a>, the combined 1 MiB dump, not either separate 512 KiB chip image</td><td><a href="https://usa.yamaha.com/files/download/other_assets/1/318161/PLG150DXE.pdf">PLG150DXE.pdf</a></td></tr>
+      <tr><th scope="row">AN</th><td><a href="https://github.com/rgwan/fs1r_firmware_RE/blob/3716f46534ab4e2d59f5f3067fd663c9068c91c9/dmps/plg150-an/IC3_XZ970A0_MBM29F800BA.bin">IC3_XZ970A0_MBM29F800BA.bin</a>, the original 1 MiB 16-bit little-endian programmer dump</td><td><a href="https://data.yamaha.com/files/download/brochure/5/317205/PLG150AN_catalogue.pdf">PLG150-AN manual</a>; use the filename <code>PLG150AN.pdf</code> for the Windows launcher</td></tr>
+    </tbody>
+  </table>
+  <p>The converter swaps the AN dump's adjacent bytes internally. Do not pre-swap it. Both firmware and manual are checked by SHA-256 before parsing; other revisions, altered PDFs, truncated dumps and arbitrary user voice files are rejected. No download is performed by either converter.</p>
+  <h3>Supported SHA-256 values</h3>
+  <table>
+    <caption>Input and verified output hashes</caption>
+    <thead><tr><th scope="col">File</th><th scope="col">SHA-256</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">DX firmware</th><td><code>bb09836a2dc13f1fecb0bf5c64c26f5cd86da98967c1d5278417d157043a73dd</code></td></tr>
+      <tr><th scope="row">DX manual</th><td><code>63b4c68b8c7d90a200dfa6f3fc0aa72b204be6bd2ac0563bfa0d2ea9edebe47d</code></td></tr>
+      <tr><th scope="row">AN firmware</th><td><code>6796ec4244c24957f931106b95f3746e439e52955a15db61bc0da76fe7231d38</code></td></tr>
+      <tr><th scope="row">AN manual</th><td><code>e785f4bba6fe0d5cac518ad77abf6d2dbd5267393e1c3d8a32f901bcc9e5df3f</code></td></tr>
+      <tr><th scope="row">plg-dx-voices.bin</th><td><code>897e55a7d0706edcaa7099f7e2f00b632281f9cf1477acdd3b247d56be45d87a</code></td></tr>
+      <tr><th scope="row">plg-an-voices.bin</th><td><code>f631196b177dadda4c850175a7305cdbdfe15dcc4cdb87db18ce0c44e19667db</code></td></tr>
+    </tbody>
+  </table>
+  <h2 id="windows">Windows quick start</h2>
+  <ol>
+    <li>Extract the tools ZIP into a writable folder. Install Python 3.10 or newer from <a href="https://www.python.org/downloads/windows/">python.org</a> if needed. The converters do not install Python or create registry settings.</li>
+    <li>Run <code>Build Voice Banks.cmd</code> and choose 4 once to set up the pinned PDF libraries. This explicitly downloads packages from PyPI into <code>user\venv</code>, without modifying system Python.</li>
+    <li>Create an <code>input</code> subfolder beside the launcher. Put the appropriate firmware and manual there with the filenames in the table.</li>
+    <li>Run the launcher again and choose 1 for AN, 2 for DX, or 3 for both. It reads inputs without modifying them and creates the bank files beside the launcher.</li>
+    <li>Close the audio host, place the generated bank files beside <code>mu2026-hybrid.dll</code> in the 0.2.2 preview runtime, then reopen the host. The converters do not install or replace the plugin.</li>
+  </ol>
+  <p>The launcher uses numbered console choices and ordinary keyboard input. Conversion progress and errors are recorded in <code>user\session.log</code> and one log per bank, overwritten on the next run. The local environment and logs stay beneath <code>user</code>. If converting both, each bank is independently validated: a successful first bank remains if the second fails. No existing bank is replaced unless <code>-Force</code> is explicitly requested.</p>
+  <p>Without input, the launcher exits on an unattended or redirected run instead of waiting for a menu answer. Example: <code>Build Voice Banks.cmd -Mode Both -NonInteractive</code>. Setup can be run explicitly with <code>-Mode Setup -NonInteractive</code>.</p>
+  <h2 id="linux">Linux and Wine quick start</h2>
+  <ol>
+    <li>Extract the same tools ZIP into a writable folder. Install your distribution's Python 3.10+ and virtual-environment support if needed; on Debian/Ubuntu the latter is commonly called <code>python3-venv</code>.</li>
+    <li>Open a terminal in that folder and run <code>sh ./Build-VoiceBanks.sh --mode setup</code>. This explicitly downloads the pinned libraries into <code>user/venv</code>; no Wine, PowerShell, administrator privileges or system pip installation is needed.</li>
+    <li>Put the required inputs in the <code>input</code> folder with exactly the filenames shown above. Linux filenames are case-sensitive.</li>
+    <li>Run <code>sh ./Build-VoiceBanks.sh --mode both</code>, or use <code>--mode an</code> / <code>--mode dx</code>. Running without a mode in an interactive terminal offers the same numbered menu as Windows. Redirected or unattended runs require a mode and never wait for keyboard input.</li>
+    <li>Close the Wine VST host. Place the generated <code>plg-an-voices.bin</code> and/or <code>plg-dx-voices.bin</code> in the actual Linux folder containing the 0.2.2 preview's <code>mu2026-hybrid.dll</code>, then reopen the host. This may be inside your Wine prefix or a folder mapped through Wine's Z: drive; it is not necessarily the updater's folder.</li>
+  </ol>
+  <p>The banks contain platform-neutral bytes: Windows and Linux emit identical files. Conversion is native Python; only running the Windows synth needs Wine. <code>--force</code> explicitly permits replacement with one <code>.previous</code> backup. Logs and the local environment live under <code>user</code>; both-bank runs preserve a successful first bank if the second fails.</p>
+  <h2 id="cli">Command-line conversion</h2>
+  <p>Use Python 3.10 or newer and the pinned <code>requirements.txt</code>. A local virtual environment is recommended. On Windows the launcher handles setup; on Linux use:</p>
+  <pre><code>python3 -m venv user/venv
+user/venv/bin/python -m pip install -r requirements.txt
+user/venv/bin/python recover_dx.py --rom input/PLG150-DX.BIN --manual input/PLG150DXE.pdf --output plg-dx-voices.bin
+user/venv/bin/python recover_an.py --rom input/IC3_XZ970A0_MBM29F800BA.bin --manual input/PLG150AN.pdf --output plg-an-voices.bin</code></pre>
+  <p>Windows CLI uses <code>user\venv\Scripts\python.exe</code> instead. Paths with spaces must be quoted. Both scripts provide <code>--help</code>, <code>--version</code>, <code>--rom</code>, <code>--manual</code>, <code>--output</code>, <code>--force</code> and optional <code>--log</code>. Relative CLI paths use the current working directory; launcher paths use its own folder.</p>
+  <p>Identical existing output is left alone. Different output is refused by default. With <code>--force</code>, the prior bank is retained as <code>.bin.previous</code> before atomic replacement; the next forced replacement refreshes that one backup. A failed replacement preserves the prior bank. Input/output collisions and symlink output files are rejected. A <code>.bin.lock</code> prevents concurrent converters; after a power loss, remove a stale lock only when no converter is running.</p>
+  <p>Exit code 0 means success or already-current output. Exit code 1 means conversion failed; argument errors return 2. Wrong input hashes or unexpected recovery results leave existing output unchanged.</p>
+  <h2 id="format">Bank container formats</h2>
+  <p>ANP1 and DXP1 are this project's containers, not raw firmware formats. Integers below are unsigned little-endian, with no structure padding; program numbers and preset indexes are zero-based. The loaders in <code>Source/AnEngine.cpp</code> and <code>Source/DxEngine.cpp</code> are the executable format reference.</p>
+  <h3>ANP1</h3>
+  <p>Header: ASCII <code>ANP1</code>, 32-bit preset count, 32-bit selection count. Each preset contains 104 common bytes, 122 scene bytes, 70 sequencer bytes, a 32-bit Free EG byte count, and either zero or 768 Free EG bytes. Each selection contains one byte each for bank MSB, bank LSB and program, followed by a 16-bit preset index. This converter emits 256 presets and 848 selections, including aliases and user-slot defaults.</p>
+  <h3>DXP1</h3>
+  <p>Header: ASCII <code>DXP1</code> and a 32-bit selection count. Each selection contains one byte each for bank MSB, bank LSB, program and layer count (1 to 4). Each layer contains a level byte, note-shift-plus-64 byte, detune-plus-64 byte, zero reserved byte and 155 unpacked DX7 VCED bytes. This converter emits 1,602 selections, including aliases and layered voices.</p>
+  <h2 id="limits">Coverage and limitations</h2>
+  <p>Four AN aliases and 97 DX selections remain unrecovered; the tools do not invent missing data. Counts are selections, not unique sounds. The generated banks reproduce the existing verified preview assets byte-for-byte, not new sounds or new chip emulation. DX/AN sound-fidelity limitations in the main plugin guide still apply.</p>
+  <p>This release supports only the exact PLG150 firmware/manual pairs above. It does not import arbitrary AN1x, AN200, DX7 SysEx or user voices, does not dump physical hardware, and does not load these images as executable firmware. AN1x/AN200 ownership or voice files alone cannot generate the factory containers with these tools. Stable Mu2026 0.1.3 does not enable DX/AN merely by adding banks; use the opt-in 0.2.2 preview.</p>
+  <p>End-to-end recovery, launcher conversion and safety tests were checked on Windows and native Linux. Actual NVDA reading of the numbered menu and a native macOS run remain unverified. No paid services or online accounts are needed for conversion.</p>
+  <h2>Credits and privacy</h2>
+  <p>Firmware dump and research credit: Zhiyuan Wan (<a href="https://github.com/rgwan/fs1r_firmware_RE">rgwan</a>). Voice parameter formats and bank assignments: Yamaha's official PLG150 manuals. Converter implementation: Andre Louis, MIT licence. Yamaha firmware, manuals and generated parameters are not licensed by the converter project. The tools contain no firmware bytes, preset banks, private paths, credentials or telemetry.</p>
+  <p>Please report errors and version information in <a href="https://github.com/OnjLouis/mu2026-hybrid/issues/5">issue 5</a>, without attaching firmware, manuals or generated bank data. Review logs for personal paths before sharing them. For updates, use the <a href="https://github.com/OnjLouis/mu2026-hybrid/releases/tag/bank-tools-v1.0.0">tools release</a>; the synth updater does not install this standalone tooling release.</p>
+  <h2>Tests</h2>
+  <pre><code>python test_bank_tools.py -v</code></pre>
+  <p>The public tests use synthetic data only. The real-input hash checks and the converter's pinned output hashes provide reproducibility checks when you supply the matching inputs.</p>
+</main>
+</body>
+</html>
