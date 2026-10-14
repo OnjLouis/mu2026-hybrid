@@ -63,7 +63,7 @@ constexpr std::size_t vlOutputBusCount = vlSignalBusCount + 6;
 constexpr std::size_t muInputBusCount = 16;
 constexpr std::size_t renderQuantumFrames = 512;
 constexpr std::int32_t hybridUniqueId = 0x4d323648; // "M26H"
-constexpr std::int32_t hybridVendorVersion = 103;
+constexpr std::int32_t hybridVendorVersion = 104;
 constexpr char hybridEffectName[] = "Mu2026 Hybrid";
 constexpr char hybridVendorName[] = "Onj Research";
 

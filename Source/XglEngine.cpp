@@ -141,7 +141,7 @@ public:
             }
             sampleRate = initialSampleRate;
             blockSize = initialBlockSize;
-            reset();
+            reset(MidiSystemReset::gm1);
         } catch (...) {
             close();
             throw;

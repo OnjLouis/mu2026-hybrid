@@ -1,4 +1,4 @@
-# Mu2026 Hybrid 0.1.3 tester notes
+# Mu2026 Hybrid 0.1.4 tester notes
 
 This is an early 32-bit Windows VST2 build, separate from S-YXG100 Hybrid and
 S-YXG2026 Hybrid. It uses a modified S-MU2000 engine for MU2000 voices and

@@ -1,5 +1,12 @@
 # Mu2026 Hybrid
 
+## Version 0.1.4: Reset-Free MIDI Drums
+
+Files without a system reset retain the normal channel-10 drum default
+after bank-zero selections. Startup no longer assumes an XG reset has
+already arrived. Explicit XG resets still allow melodic channel 10.
+Other resets, gains and effects are unchanged.
+
 Mu2026 Hybrid is a separate 32-bit VST2 wrapper over a modified S-MU2000
 engine. It uses MU2000 voices first, S-YXG2006LE only for detected MU voice
 gaps, and the existing native VL/PVL and SG workers. It does not load XG50.
