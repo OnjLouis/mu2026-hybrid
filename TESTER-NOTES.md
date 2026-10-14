@@ -1,7 +1,7 @@
-# Mu2026 Hybrid 0.2.2 research prerelease
+# Mu2026 Hybrid 0.2.3 research prerelease
 
 This opt-in preview adds native DX and an approximate AN engine to the existing
-32-bit Windows VST2 instrument. Stable 0.1.3 remains available and the signed
+32-bit Windows VST2 instrument. Stable 0.1.4 remains available and the signed
 updater ignores this prerelease. Test in a separate plugin folder. It retains
 the same VST identity, so choose the preview explicitly in your host.
 

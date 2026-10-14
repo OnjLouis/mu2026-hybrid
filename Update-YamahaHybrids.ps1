@@ -12,7 +12,7 @@ param(
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$UpdaterVersion = [version]"1.1.0"
+$UpdaterVersion = [version]"1.1.1"
 $MaximumMetadataBytes = 1MB
 $MaximumPackageBytes = 100MB
 $MaximumExtractedBytes = 150MB

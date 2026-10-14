@@ -1,5 +1,12 @@
 # Mu2026 Hybrid
 
+## Version 0.2.3: Reset-Free MIDI Drums
+
+Files without a system reset retain the normal channel-10 drum default
+after bank-zero selections. Startup no longer assumes an XG reset has
+already arrived. Explicit XG resets still allow melodic channel 10.
+Other resets, gains and effects are unchanged.
+
 ## Generate DX and AN Voice Banks
 
 The [Voice Bank Tools HTML guide](Tools/VoiceBankConverters/README.html) explains
