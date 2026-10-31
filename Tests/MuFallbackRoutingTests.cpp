@@ -40,5 +40,18 @@ int main(int argc, char** argv)
     le.queueShort(0x000020b0u, 0); // Back to MU base bank
     assert(!le.selectedVoice(0));
     assert(!le.queueShort(0x00643e90u, 0));
+    // Castaway's PSR Dance Kit is absent in MU, but its other drum part is MU-owned.
+    le.reset(hybrid::MidiSystemReset::xg);
+    le.queueShort(0x007f00b8u, 0);
+    le.queueShort(0x000020b8u, 0);
+    le.queueShort(0x000070c8u, 0);
+    assert(le.selectedVoice(8));
+    assert(le.queueShort(0x00642498u, 0));
+    assert(!le.queueShort(0x00002488u, 0)); // Releases also reach MU.
+    le.queueShort(0x007f00b9u, 0);
+    le.queueShort(0x000020b9u, 0);
+    le.queueShort(0x000001c9u, 0);
+    assert(!le.selectedVoice(9));
+    assert(!le.queueShort(0x00642499u, 0));
     return 0;
 }

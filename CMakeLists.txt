@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(Mu2026Hybrid VERSION 0.2.3 LANGUAGES CXX)
+project(Mu2026Hybrid VERSION 0.2.4 LANGUAGES CXX)
 
 if(NOT WIN32 OR CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "Mu2026 Hybrid currently requires a 32-bit Windows target")
@@ -200,6 +200,17 @@ add_executable(MuFallbackRoutingTests
 )
 target_link_options(MuFallbackRoutingTests PRIVATE
     -static -static-libgcc -static-libstdc++)
+
+add_executable(MuDrumFallbackTests
+    Tests/MuDrumFallbackTests.cpp
+    Source/MuVoiceCatalog.cpp
+    Source/XglVoiceMap.cpp
+)
+target_link_options(MuDrumFallbackTests PRIVATE
+    -static -static-libgcc -static-libstdc++)
+target_compile_options(MuDrumFallbackTests PRIVATE -UNDEBUG)
+target_compile_options(MuFallbackRoutingTests PRIVATE -UNDEBUG)
+add_test(NAME MuDrumFallbackTests COMMAND MuDrumFallbackTests)
 
 add_executable(MuInsertionRoutingTests Tests/MuInsertionRoutingTests.cpp)
 target_link_options(MuInsertionRoutingTests PRIVATE

@@ -1,5 +1,15 @@
 # Mu2026 Hybrid
 
+## Version 0.2.4: PSR Drum-Kit Fallback
+
+Recognize the MU ROM's silent-kit placeholders as gaps when S-YXG2006LE
+has a matching kit. This restores the PSR Dance Kit at MSB 127, LSB 0,
+zero-based program 112 (displayed program 113), including Castaway.
+Real MU kits keep priority; unknown ROM layouts keep the existing MU route.
+The recovered kit uses the existing MU effects path. No gains, ROMs, workers,
+MU engine, resets or unrelated voice mappings changed. Thanks to Yamamoto
+for the example and precise report.
+
 ## Version 0.2.3: Reset-Free MIDI Drums
 
 Files without a system reset retain the normal channel-10 drum default
