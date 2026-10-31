@@ -16,6 +16,12 @@ constexpr std::size_t lsbGroupNative = 0x2839d0;
 constexpr std::size_t lsbGroup77 = 0x283ad0;
 constexpr std::size_t lsbGroupC9Native = 0x292640;
 constexpr std::size_t voiceTable = 0x267f50;
+constexpr std::size_t drumProgramMap = 0x299fcc;
+constexpr std::size_t drumNames = 0x299dc0;
+constexpr std::size_t sfxProgramMap = 0x29be58;
+constexpr std::size_t sfxNames = 0x29bdec;
+constexpr std::size_t kitNameSize = 8;
+constexpr std::size_t kitRecordSize = 12;
 
 } // namespace
 
@@ -62,8 +68,21 @@ bool MuVoiceCatalog::hasDistinctVoice(std::uint8_t msb,
                                       std::uint8_t lsb,
                                       std::uint8_t program) const noexcept
 {
-    if (!valid() || msb == 126 || msb == 127)
+    if (!valid())
         return true;
+    if (msb == 126 || msb == 127) {
+        // Only the ROM's silent-kit slots are gaps; real MU kits retain priority.
+        // An unrecognized layout keeps the original MU path rather than guessing.
+        if (std::memcmp(rom.data() + drumNames, "StandKit", kitNameSize) != 0
+            || std::memcmp(rom.data() + sfxNames, "SFXKit 1", kitNameSize) != 0) {
+            return true;
+        }
+        const auto map = msb == 127 ? drumProgramMap : sfxProgramMap;
+        const auto names = msb == 127 ? drumNames : sfxNames;
+        const auto index = rom[map + program];
+        return std::memcmp(rom.data() + names + index * kitRecordSize,
+                           "SilenKit", kitNameSize) != 0;
+    }
     const auto selected = record(msb, lsb, program);
     if (msb == 0 && lsb == 0)
         return true;

@@ -8,6 +8,8 @@
 <body>
   <main>
     <h1>Mu2026 Hybrid</h1>
+    <h2>Version 0.1.5: PSR drum-kit fallback</h2>
+    <p>When the MU ROM maps a drum selection to its silent-kit placeholder and S-YXG2006LE has a matching kit, the fallback now supplies it through the existing MU effects path. This restores the PSR Dance Kit at MSB 127, LSB 0, zero-based program 112 (displayed program 113), as used by Castaway. Real MU kits retain priority. Unknown ROM layouts retain the original MU route. Gains, resets, workers and the MU engine are unchanged. Thanks to Yamamoto for the detailed report and example.</p>
     <h2>Stable 0.1.4: Reset-free MIDI drums</h2>
     <p>Files without a system reset keep channel 10 as drums after bank-zero
     selections. Explicit XG resets still allow melodic channel 10.
