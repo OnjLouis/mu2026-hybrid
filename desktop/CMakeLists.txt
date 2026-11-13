@@ -1,0 +1,96 @@
+cmake_minimum_required(VERSION 3.22)
+project(OnjMu2000 VERSION 1.0.0 LANGUAGES C CXX)
+include(CTest)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(SMU_SOURCE "" CACHE PATH "Pinned Mu2026 S-MU2000 engine source")
+set(ACCESSIBLE_CONTROLS "" CACHE PATH "Hypersonic shared OnjMusic control headers")
+set(CANVAS_CONTROLS "" CACHE PATH "Sound Canvas shared OnjMusic control headers")
+add_subdirectory("${SMU_SOURCE}" smu EXCLUDE_FROM_ALL)
+if(MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set_property(TARGET smu2000_core PROPERTY COMPILE_OPTIONS /W3 "/FI${CMAKE_CURRENT_SOURCE_DIR}/MsvcCompat.h")
+endif()
+include(FetchContent)
+FetchContent_Declare(juce GIT_REPOSITORY https://github.com/juce-framework/JUCE.git GIT_TAG 9.0.5 GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(juce)
+if(WIN32)
+    include(WindowsShortcutMetadata.cmake)
+endif()
+
+set(mu_formats VST3 Standalone)
+set(mu_auto_manifest TRUE)
+if(APPLE)
+    list(APPEND mu_formats AU)
+elseif(WIN32)
+    # JUCE's recursive Ninja helper defaults to a debug CRT not installed on end-user PCs.
+    set(mu_auto_manifest FALSE)
+endif()
+juce_add_plugin(OnjMu2000 COMPANY_NAME OnjMusic BUNDLE_ID me.onj.mu2000-pilot
+    PLUGIN_MANUFACTURER_CODE OnjM PLUGIN_CODE Mu2k PRODUCT_NAME "MU2000 Pilot" PLUGIN_NAME "MU2000"
+    FORMATS ${mu_formats} IS_SYNTH TRUE NEEDS_MIDI_INPUT TRUE
+    EDITOR_WANTS_KEYBOARD_FOCUS TRUE VST3_CATEGORIES Instrument Synth VST3_AUTO_MANIFEST ${mu_auto_manifest}
+    NEEDS_WEB_BROWSER FALSE NEEDS_CURL FALSE)
+if(APPLE)
+    set_target_properties(OnjMu2000_Standalone PROPERTIES OUTPUT_NAME "MU2000")
+    add_custom_command(TARGET OnjMu2000_Standalone POST_BUILD
+        COMMAND /usr/libexec/PlistBuddy -c "Set :CFBundleName MU2000" "$<TARGET_BUNDLE_DIR:OnjMu2000_Standalone>/Contents/Info.plist"
+        COMMAND /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName MU2000" "$<TARGET_BUNDLE_DIR:OnjMu2000_Standalone>/Contents/Info.plist"
+        COMMAND /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable MU2000" "$<TARGET_BUNDLE_DIR:OnjMu2000_Standalone>/Contents/Info.plist"
+        COMMAND /usr/bin/codesign --force --sign - "$<TARGET_BUNDLE_DIR:OnjMu2000_Standalone>"
+        VERBATIM)
+endif()
+include(EngineSource.cmake)
+target_sources(OnjMu2000 PRIVATE Pilot.cpp PresetExport.cpp "${CMAKE_CURRENT_BINARY_DIR}/PilotEngine.cpp" "${SMU_SOURCE}/src/xg/model.cpp")
+target_include_directories(OnjMu2000 PRIVATE "${ACCESSIBLE_CONTROLS}" "${CANVAS_CONTROLS}" "${SMU_SOURCE}/src/vst3")
+target_link_libraries(OnjMu2000 PRIVATE smu2000_core juce::juce_audio_utils juce::juce_cryptography)
+target_compile_definitions(OnjMu2000 PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_USE_OGGVORBIS=1)
+if(WIN32)
+    target_compile_definitions(OnjMu2000 PRIVATE NOMINMAX)
+    set(ASIO_SDK_DIR "" CACHE PATH "Steinberg ASIO SDK, using the GPLv3 option")
+    if(NOT ASIO_SDK_DIR)
+        FetchContent_Declare(mu_asio
+            URL https://download.steinberg.net/sdk_downloads/ASIO-SDK_2.3.4_2025-10-15.zip
+            URL_HASH SHA256=D5EBF0C20DD2C5F43771FD0C1418F4B361BF52434EE670097CFA6B3A335E2ECA
+            DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+        FetchContent_MakeAvailable(mu_asio)
+        set(ASIO_SDK_DIR "${mu_asio_SOURCE_DIR}")
+    endif()
+    if(NOT EXISTS "${ASIO_SDK_DIR}/common/asio.h")
+        message(FATAL_ERROR "A Windows MU2000 build requires the Steinberg ASIO SDK")
+    endif()
+    # JUCE's audio device module is compiled in the shared-code target.
+    target_compile_definitions(OnjMu2000 PUBLIC JUCE_ASIO=1 JUCE_WASAPI=1 JUCE_ASIO_USE_EXTERNAL_SDK=1)
+    target_include_directories(OnjMu2000 PRIVATE "${ASIO_SDK_DIR}/common")
+endif()
+target_sources(OnjMu2000_Standalone PRIVATE Standalone.cpp)
+target_include_directories(OnjMu2000_Standalone PRIVATE "${CANVAS_CONTROLS}" "${ACCESSIBLE_CONTROLS}" "${SMU_SOURCE}/src")
+target_compile_definitions(OnjMu2000_Standalone PRIVATE JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1)
+if(APPLE)
+    enable_language(OBJCXX)
+    set_target_properties(OnjMu2000_Standalone PROPERTIES OBJCXX_STANDARD 20 OBJCXX_STANDARD_REQUIRED ON)
+    set_source_files_properties(Standalone.cpp PROPERTIES LANGUAGE OBJCXX)
+    target_sources(OnjMu2000_Standalone PRIVATE "${CANVAS_CONTROLS}/KeyboardAnnouncement.mm")
+elseif(WIN32)
+    set_target_properties(OnjMu2000_Standalone PROPERTIES OUTPUT_NAME "MU2000")
+    target_sources(OnjMu2000_Standalone PRIVATE "${CANVAS_CONTROLS}/KeyboardAnnouncementWindows.cpp")
+    target_compile_definitions(OnjMu2000_Standalone PRIVATE NOMINMAX)
+    target_link_libraries(OnjMu2000_Standalone PRIVATE uiautomationcore oleaut32 comctl32)
+    get_target_property(juce_modules juce_audio_plugin_client INTERFACE_JUCE_MODULE_PATH)
+    add_executable(Mu2000Manifest "${juce_modules}/juce_audio_plugin_client/VST3/juce_VST3ManifestHelper.cpp")
+    target_compile_definitions(Mu2000Manifest PRIVATE $<TARGET_PROPERTY:OnjMu2000,COMPILE_DEFINITIONS>)
+    target_include_directories(Mu2000Manifest PRIVATE $<TARGET_PROPERTY:OnjMu2000,INCLUDE_DIRECTORIES>)
+    target_link_libraries(Mu2000Manifest PRIVATE ole32)
+    add_dependencies(OnjMu2000_VST3 Mu2000Manifest)
+    add_custom_command(TARGET OnjMu2000_VST3 POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:OnjMu2000_VST3>/../Resources"
+        COMMAND "${CMAKE_COMMAND}" "-DHELPER=$<TARGET_FILE:Mu2000Manifest>"
+            "-DOUTPUT=$<TARGET_FILE_DIR:OnjMu2000_VST3>/../Resources/moduleinfo.json"
+            -P "${CANVAS_CONTROLS}/../cmake/WriteManifest.cmake" VERBATIM)
+endif()
+include(ConfigureMaintenance.cmake)
+add_executable(Mu2000ReleaseIdentityTest EXCLUDE_FROM_ALL ReleaseIdentityTest.cpp)
+add_test(NAME Mu2000ReleaseIdentity COMMAND Mu2000ReleaseIdentityTest)
+juce_add_console_app(MuVstProbe PRODUCT_NAME MuVstProbe)
+target_sources(MuVstProbe PRIVATE VstProbe.cpp)
+target_compile_definitions(MuVstProbe PRIVATE JUCE_PLUGINHOST_VST3=1 JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0)
+target_link_libraries(MuVstProbe PRIVATE juce::juce_audio_utils)

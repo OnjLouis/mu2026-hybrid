@@ -1,5 +1,12 @@
 # Mu2026 Hybrid
 
+## MU2000 Desktop
+
+For the standalone, VST3 and Apple Silicon Audio Unit, see the
+[MU2000 Desktop downloads](https://github.com/OnjLouis/mu2026-hybrid/releases/tag/mu2000-v1.0.0)
+and [desktop documentation](desktop/DESKTOP.md). The desktop release uses the
+base S-MU2000 engine and does not replace the Mu2026 Hybrid VST2 below.
+
 ## Version 0.2.4: PSR Drum-Kit Fallback
 
 Recognize the MU ROM's silent-kit placeholders as gaps when S-YXG2006LE
