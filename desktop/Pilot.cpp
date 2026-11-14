@@ -7,6 +7,7 @@
 #include "ControlCatalog.h"
 #include "PresetAddress.h"
 #include "PresetExport.h"
+#include "StateCompression.h"
 #include "NumericSlider.h"
 #include "vst3/engine.h"
 #include "xg/voices.h"
@@ -174,15 +175,26 @@ public:
                 return;
             }
         }
+        const auto compressed = mu_pilot::compressEngineState(state);
         MemoryOutputStream out(data, false);
-        out.writeInt(stateMagicV2);
+        out.writeInt(compressed.isEmpty() ? stateMagicV2 : mu_pilot::compressedStateMagic);
         out.writeInt(int(parameters.size()));
         for (const auto* parameter : parameters) out.writeShort(short(parameter->get()));
-        out.write(state.data(), state.size());
+        if (compressed.isEmpty()) out.write(state.data(), state.size());
+        else out.write(compressed.getData(), compressed.getSize());
     }
     void setStateInformation(const void* data, int size) override {
         if (size <= 0) return;
         auto* bytes = static_cast<const uint8_t*>(data);
+        MemoryBlock expanded;
+        if (size >= 4 && ByteOrder::littleEndianInt(bytes) == mu_pilot::compressedStateMagic) {
+            if (size < 8) return;
+            const auto count = ByteOrder::littleEndianInt(bytes + 4);
+            if (count > uint32_t((size - 8) / 2)) return;
+            const auto offset = size_t(8 + count * 2);
+            expanded = mu_pilot::expandEngineState({bytes + offset, size_t(size) - offset});
+            if (expanded.isEmpty()) return;
+        }
         constexpr int legacyCount = 14, headerSize = 4 + legacyCount;
         for (auto* parameter : parameters) parameter->pending.store(-1, std::memory_order_relaxed);
         mu_pilot::PresetAddress address{};
@@ -197,7 +209,7 @@ public:
             for (size_t i = 0; i < legacyCount; ++i) parameters[i]->refreshFromEngine(bytes[4 + i] & 127);
             bytes += headerSize;
             size -= headerSize;
-        } else if (size >= 8 && ByteOrder::littleEndianInt(bytes) == stateMagicV2) {
+        } else if (size >= 8 && (ByteOrder::littleEndianInt(bytes) == stateMagicV2 || !expanded.isEmpty())) {
             const auto count = ByteOrder::littleEndianInt(bytes + 4);
             if (count > uint32_t((size - 8) / 2)) return;
             for (size_t i = 0; i < jmin(size_t(count), parameters.size()); ++i) {
@@ -207,7 +219,8 @@ public:
             bytes += 8 + count * 2;
             size -= int(8 + count * 2);
         }
-        if (size > 0) engine.load_state(bytes, size_t(size));
+        if (!expanded.isEmpty()) engine.load_state(static_cast<const uint8_t*>(expanded.getData()), expanded.getSize());
+        else if (size > 0) engine.load_state(bytes, size_t(size));
     }
     bool send(int part, std::initializer_list<uint8_t> bytes) {
         return engine.panel().send_port(part / partsPerPort, bytes.begin(), bytes.size());

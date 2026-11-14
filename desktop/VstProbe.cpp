@@ -136,6 +136,36 @@ int main(int argc, char** argv) {
     midi.addEvent(MidiMessage::noteOn(2, 67, uint8_t(88)), 31);
     for (int i = 0; i < 15; ++i) render();
     if (audio.getMagnitude(0, block) < 1e-4f) return 7;
+    if (argc == 4 && String(argv[2]) == "--write-legacy-state") {
+        if (state.getSize() < 5 * 1024 * 1024 || !File(argv[3]).replaceWithData(state.getData(), state.getSize())) return 44;
+        plugin->releaseResources();
+        return 0;
+    }
+    if (argc == 4 && String(argv[2]) == "--compact-state") {
+        if (state.getSize() >= 1024 * 1024) return 40;
+        MemoryBlock legacy;
+        if (!File(argv[3]).loadFileAsData(legacy) || legacy.getSize() < 5 * 1024 * 1024) return 41;
+        auto sample = [&](const MemoryBlock& preset) {
+            plugin->setStateInformation(preset.getData(), int(preset.getSize()));
+            for (int i = 0; i < 120; ++i) render();
+            midi.addEvent(MidiMessage::noteOn(1, 60, uint8_t(100)), 0);
+            double energy = 0;
+            for (int i = 0; i < 80; ++i) { render(); const auto rms = audio.getRMSLevel(0, 0, block); energy += double(rms) * rms; }
+            return energy;
+        };
+        plugin->setStateInformation(legacy.getData(), int(legacy.getSize()));
+        for (int i = 0; i < 120; ++i) render();
+        MemoryBlock updated;
+        plugin->getStateInformation(updated);
+        if (updated.isEmpty() || updated.getSize() >= 1024 * 1024) return 42;
+        const auto first = sample(legacy), second = sample(updated);
+        std::cout << "VST3 legacy recall: " << legacy.getSize() << " -> " << updated.getSize()
+                  << " bytes; audio energy: " << first << ", " << second
+                  << "; 20-second render late blocks: " << late << '\n';
+        if (first < 1e-6 || std::abs(first - second) > 0.1 * first) return 43;
+        plugin->releaseResources();
+        return 0;
+    }
     auto editor = std::unique_ptr<AudioProcessorEditor>(plugin->createEditorAndMakeActive());
     if (!editor || editor->getWidth() <= 0) return 8;
 #if JUCE_MAC
