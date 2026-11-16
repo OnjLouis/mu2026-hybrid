@@ -120,17 +120,18 @@ MemoryBlock makeNks(const Entry& entry, String bank) {
     StringArray names;
     for (const auto& c : controls) if (!names.contains(c.page)) names.add(c.page);
     for (const auto& page : names) {
-        if (drums && page != "Mixer" && page != "Reverb" && page != "Chorus" && page != "Variation"
-            && !page.startsWith("Master")) continue;
         Array<var> knobs;
         for (const auto& c : controls) {
             if (page != c.page) continue;
+            if (drums ? (c.key && definitions()[&c - controls.data()].where == xg::area::part
+                            && page != "Mixer" && String(c.id) != "partMode")
+                      : drumControl(c)) continue;
             auto knob = object({{"id", int(String(c.id).hashCode() & 0x7fffffff)}, {"name", c.label},
                                 {"autoname", false}, {"vflag", false}});
             if (knobs.isEmpty()) knob.getDynamicObject()->setProperty("section", page);
             knobs.add(knob);
         }
-        pages.add(var(knobs));
+        if (!knobs.isEmpty()) pages.add(var(knobs));
     }
     MemoryOutputStream riff;
     riff.write("NIKS", 4);

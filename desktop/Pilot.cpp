@@ -33,6 +33,12 @@ std::mutex effectCatalogueLock;
 bool effectCatalogueLoaded = false;
 
 String controlText(const xg::param& p, int value) {
+    if (p.how == xg::view::part_off) {
+        if (value == mu_pilot::routingOff) return "Off";
+        if (value >= portCount * partsPerPort) return "A/D " + String(value - portCount * partsPerPort + 1);
+        return "Port " + String::charToString(juce_wchar('A' + value / partsPerPort))
+            + ", Part " + String(value % partsPerPort + 1);
+    }
     if (mu_pilot::effectType(p)) {
         const std::lock_guard guard(effectCatalogueLock);
         const auto& types = p.hi == 2 && p.lo == 0 ? xg::rev_types()
@@ -53,19 +59,44 @@ String controlText(const xg::param& p, int value) {
     return xg::format(p, value);
 }
 
+String effectValueText(const xg::fx_param& p, int value) {
+    if (p.fmt == xg::fx_fmt::table && value >= p.lo && value <= p.hi) {
+        const String text(p.texts[value - p.lo]);
+        if (text.startsWithChar('+')) return "plus " + text.substring(1);
+        if (text.startsWithChar('-')) return "minus " + text.substring(1);
+        return text;
+    }
+    if (p.fmt == xg::fx_fmt::tenths) return String(value / 10.0, 1);
+    return String(value);
+}
+
 class PartParameter final : public AudioParameterInt {
 public:
     PartParameter(const mu_pilot::Control& c, const xg::param& p)
         : AudioParameterInt({c.id, 1}, p.where == xg::area::part && String(c.page) == "Mixer"
                             ? String(c.label) : String(c.page) + " " + c.label,
-              p.min, p.max, p.def, AudioParameterIntAttributes().withStringFromValueFunction(
-                  [&p](int value, int length) { return controlText(p, value).substring(0, length > 0 ? length : 128); })) {}
+              p.min, p.max, p.def), definition(p), isEffectSlot(mu_pilot::effectSlot(c)) {}
+    String getText(float normalised, int length) const override {
+        const auto value = roundToInt(convertFrom0to1(normalised));
+        const auto* effect = currentEffect.load(std::memory_order_relaxed);
+        const auto text = isEffectSlot
+            ? (effect ? effectValueText(*effect, mu_pilot::decodeEffectValue(*effect, definition.max, value)) : String("Unused"))
+                                        : controlText(definition, value);
+        return length > 0 ? text.substring(0, length) : text;
+    }
+    void setEffect(const xg::fx_param* effect) {
+        if (currentEffect.exchange(effect, std::memory_order_relaxed) != effect)
+            cacheChanged.store(true, std::memory_order_relaxed);
+    }
     void refresh(int value) {
         const int observed = pending.load(std::memory_order_relaxed);
         if (observed < 0) static_cast<AudioProcessorParameter&>(*this).setValue(convertTo0to1(float(value)));
     }
     std::atomic<int> pending{-1};
 private:
+    const xg::param& definition;
+    const bool isEffectSlot;
+    std::atomic<const xg::fx_param*> currentEffect{nullptr};
     void valueChanged(int value) override {
         if (!refreshing) pending.store(value, std::memory_order_relaxed);
     }
@@ -92,7 +123,7 @@ class Processor final : public AudioProcessor, private Timer {
 public:
     Processor() : AudioProcessor(BusesProperties().withOutput("Stereo", AudioChannelSet::stereo(), true)) {
         for (size_t i = 0; i < partControls.size(); ++i) {
-            parameters[i] = new PartParameter(partControls[i], *definitions[i]);
+            parameters[i] = new PartParameter(partControls[i], definitions[i]);
             addParameter(parameters[i]);
         }
         engine.start();
@@ -121,14 +152,28 @@ public:
         const auto started = std::chrono::steady_clock::now();
         const auto n = audio.getNumSamples();
         if (engine.state() == smu2000::vst3::status::ready) {
+            const int note = parameters[mu_pilot::drumNoteIndex]->pending.exchange(-1, std::memory_order_relaxed);
+            if (mu_pilot::validDrumNote(note)) drumNote.store(note, std::memory_order_relaxed);
             for (size_t i = 0; i < parameters.size(); ++i) {
-                const int value = parameters[i]->pending.exchange(-1, std::memory_order_relaxed);
+                int value = parameters[i]->pending.exchange(-1, std::memory_order_relaxed);
                 if (value < 0) continue;
-                const auto message = mu_pilot::controlMessage(*definitions[i], 0, value);
+                const auto& c = partControls[i];
+                const auto& p = definitions[i];
+                if (mu_pilot::effectType(p))
+                    requestedTypes[p.hi == 3 ? 3 + p.mid : p.lo / 0x20] = {value, int(rateHz / 8)};
+                const int overrideType = mu_pilot::effectSlot(c)
+                    && parameterSnapshot.serial ? requestedType(c) : -1;
+                if (mu_pilot::effectSlot(c)) {
+                    const auto* effect = mu_pilot::effectBinding(c, parameterSnapshot, overrideType).parameter;
+                    if (!effect) continue;
+                    value = mu_pilot::decodeEffectValue(*effect, p.max, value);
+                }
+                const auto message = mu_pilot::writeControl(c, 0, drumNote.load(std::memory_order_relaxed),
+                                                           parameterSnapshot, value, overrideType);
                 if (i == 0 || i == 1) {
                     const uint8_t cc[]{0xb0, uint8_t(i == 0 ? 7 : 10), uint8_t(value)};
                     engine.midi(cc, sizeof cc);
-                } else {
+                } else if (message.size) {
                     engine.midi(message.data.data(), message.size);
                 }
                 readbackDelay[i] = int(rateHz / 8);
@@ -146,13 +191,26 @@ public:
         if (n > cursor) engine.fill(left + cursor, right + cursor, n - cursor);
         if (engine.state() == smu2000::vst3::status::ready) {
             engine.panel().read_xg(parameterSnapshot);
+            for (auto& request : requestedTypes) request.wait = jmax(0, request.wait - n);
+            const bool fresh = parameterSnapshot.serial != lastParameterSerial;
+            lastParameterSerial = parameterSnapshot.serial;
+            const int note = drumNote.load(std::memory_order_relaxed);
             if (parameterSnapshot.serial)
                 for (size_t i = 0; i < parameters.size(); ++i) {
+                    const auto& c = partControls[i];
+                    const bool delayEnded = readbackDelay[i] > 0 && readbackDelay[i] <= n;
                     readbackDelay[i] = jmax(0, readbackDelay[i] - n);
+                    if (!(fresh || delayEnded || (mu_pilot::drumControl(c) && note != lastReadNote))) continue;
                     int value = 0;
-                    if (!readbackDelay[i] && ui::read_value(*definitions[i], 0, parameterSnapshot, value)
-                        && xg::valid(*definitions[i], value)) parameters[i]->refreshFromEngine(value);
+                    const auto* effect = mu_pilot::effectSlot(c)
+                        ? mu_pilot::effectBinding(c, parameterSnapshot).parameter : nullptr;
+                    if (mu_pilot::effectSlot(c)) parameters[i]->setEffect(effect);
+                    if (!readbackDelay[i] && mu_pilot::readControl(c, 0, note, parameterSnapshot, value)) {
+                        if (effect) value = mu_pilot::encodeEffectValue(*effect, definitions[i].max, value);
+                        parameters[i]->refreshFromEngine(value);
+                    }
                 }
+            lastReadNote = note;
         }
         midi.clear();
         if (n > 0) {
@@ -199,6 +257,7 @@ public:
         for (auto* parameter : parameters) parameter->pending.store(-1, std::memory_order_relaxed);
         mu_pilot::PresetAddress address{};
         if (mu_pilot::PresetAddress::decode({bytes, size_t(size)}, address)) {
+            drumNote.store(partControls[mu_pilot::drumNoteIndex].initial, std::memory_order_relaxed);
             pendingAddress.store((int(address.msb) << 16) | (int(address.lsb) << 8) | address.program, std::memory_order_relaxed);
             const auto setup = address.setup();
             engine.load_state(bytes, 0, setup.data(), setup.size());
@@ -214,7 +273,9 @@ public:
             if (count > uint32_t((size - 8) / 2)) return;
             for (size_t i = 0; i < jmin(size_t(count), parameters.size()); ++i) {
                 const auto value = ByteOrder::littleEndianShort(bytes + 8 + i * 2);
-                if (xg::valid(*definitions[i], value)) parameters[i]->refreshFromEngine(value);
+                if (!xg::valid(definitions[i], value)) continue;
+                if (i == mu_pilot::drumNoteIndex) drumNote.store(value, std::memory_order_relaxed);
+                parameters[i]->refreshFromEngine(value);
             }
             bytes += 8 + count * 2;
             size -= int(8 + count * 2);
@@ -233,17 +294,27 @@ public:
     bool control(int part, int number, int value) {
         return send(part, {uint8_t(0xb0 | (part % partsPerPort)), uint8_t(number), uint8_t(value)});
     }
-    bool editPart(int part, size_t index, int value) {
-        const auto& p = *definitions[index];
-        if (part == 0 || p.where != xg::area::part) {
+    bool editPart(int part, size_t index, int value, const ui::xg_snapshot& snapshot, int note) {
+        const auto& c = partControls[index];
+        const auto& p = definitions[index];
+        if (mu_pilot::effectSlot(c)) {
+            const auto* effect = mu_pilot::effectBinding(c, snapshot).parameter;
+            if (!effect) return false;
+            value = mu_pilot::encodeEffectValue(*effect, p.max, value);
+        }
+        if (part == 0 || (!mu_pilot::drumControl(c) && p.where != xg::area::part)) {
             auto* parameter = parameters[index];
             parameter->beginChangeGesture();
             parameter->setValueNotifyingHost(parameter->convertTo0to1(float(value)));
             parameter->endChangeGesture();
             return true;
         }
-        const auto message = mu_pilot::controlMessage(p, part, value);
-        return engine.panel().send_port(0, message.data.data(), message.size);
+        const auto message = mu_pilot::writeControl(c, part, note, snapshot, value);
+        return message.size && engine.panel().send_port(0, message.data.data(), message.size);
+    }
+    int selectedDrumNote() const {
+        const auto pending = parameters[mu_pilot::drumNoteIndex]->pending.load(std::memory_order_relaxed);
+        return mu_pilot::validDrumNote(pending) ? pending : drumNote.load(std::memory_order_relaxed);
     }
     bool resetXg() { return engine.panel().send(xgReset.data(), xgReset.size()); }
     std::function<void()> audioSettings;
@@ -252,14 +323,23 @@ public:
     std::atomic<unsigned> lateBlocks{0};
     std::atomic<double> peakLoad{0}, recentLoad{0};
 private:
+    int requestedType(const mu_pilot::Control& control) const {
+        const auto& request = requestedTypes[int(control.target) - int(mu_pilot::Target::reverb)];
+        return request.wait ? request.type : -1;
+    }
     void timerCallback() override { for (auto* parameter : parameters) parameter->notifyReadback(); }
     static constexpr uint32_t stateMagic = 0x3150554f; // OUP1, followed by Part 1 values and the original engine state.
     static constexpr uint32_t stateMagicV2 = 0x3250554f;
     decltype(mu_pilot::definitions()) definitions = mu_pilot::definitions();
     std::array<PartParameter*, partControls.size()> parameters{};
     std::array<int, partControls.size()> readbackDelay{};
+    struct RequestedType { int type = -1, wait = 0; };
+    std::array<RequestedType, 7> requestedTypes{};
     std::atomic<int> pendingAddress{-1};
+    std::atomic<int> drumNote{partControls[mu_pilot::drumNoteIndex].initial};
     ui::xg_snapshot parameterSnapshot{};
+    uint64_t lastParameterSerial = 0;
+    int lastReadNote = -1;
     double rateHz = 44100.0;
 };
 
@@ -299,22 +379,44 @@ public:
         controlPage.onChange = [this] { showControlPage(); };
         for (size_t i = 0; i < sliders.size(); ++i) {
             auto& slider = sliders[i];
-            const auto& p = *mu_pilot::definitions()[i];
-            configure(slider, partControls[i].label, p.where == xg::area::part
+            const auto& p = mu_pilot::definitions()[i];
+            const auto& c = partControls[i];
+            configure(slider, c.label, c.target == mu_pilot::Target::drumNote
+                ? "Choose the MIDI note to edit in the numbered drum setup used by this part."
+                : c.target == mu_pilot::Target::drum
+                ? "Edits the selected note. Choose a numbered drum setup in Routing if the part is in plain Drum mode."
+                : mu_pilot::effectSlot(c) ? "The active effect algorithm determines this parameter and its range."
+                : p.how == xg::view::part_off ? "Choose which part receives the insertion effect, or Off."
+                : p.where == xg::area::part
                 ? "Adjust this setting for the selected part." : "This setting affects the whole instrument.");
             slider.setName(partControls[i].label);
             slider.setWantsKeyboardFocus(true);
             slider.setRange(p.min, p.max, 1);
             slider.setSliderStyle(Slider::LinearHorizontal);
-            slider.textFromValueFunction = [&p](double value) { return controlText(p, roundToInt(value)); };
-            slider.valueFromTextFunction = [&p](const String& text) {
+            slider.textFromValueFunction = [this, i, &p](double value) {
+                if (const auto* effect = effectDetails[i]) return effectValueText(*effect, roundToInt(value));
+                return controlText(p, roundToInt(value));
+            };
+            slider.valueFromTextFunction = [this, i, &p](const String& text) {
+                if (const auto* effect = effectDetails[i]) {
+                    if (effect->fmt == xg::fx_fmt::tenths) return double(roundToInt(text.getDoubleValue() * 10.0));
+                    for (int value = effect->lo; effect->fmt == xg::fx_fmt::table && value <= effect->hi; ++value)
+                        if (effectValueText(*effect, value).equalsIgnoreCase(text.trim())) return double(value);
+                    return double(text.getIntValue());
+                }
                 for (int value = p.min; value <= p.max; ++value)
                     if (controlText(p, value).equalsIgnoreCase(text.trim())) return double(value);
                 return double(text.getIntValue() + (p.how == xg::view::center ? p.center : 0));
             };
             slider.configureValueField(112);
             slider.onValueChange = [this, i] {
-                processor.editPart(selected(), i, roundToInt(sliders[i].getValue()));
+                const int value = roundToInt(sliders[i].getValue());
+                if (i == mu_pilot::drumNoteIndex && selected() != 0) {
+                    localDrumNote = value;
+                } else {
+                    processor.editPart(selected(), i, value, snapshot, currentDrumNote());
+                }
+                if (i == mu_pilot::drumNoteIndex) updatePart(false);
                 holdUntil = Time::getMillisecondCounterHiRes() + 300.0;
             };
             if (mu_pilot::effectType(p)) {
@@ -322,7 +424,7 @@ public:
                 configure(*combo, "Type", "Select the effect algorithm. Changing type resets its parameters.");
                 combo->onChange = [this, i] {
                     if (const auto id = effectChoices[i]->getSelectedId(); id > 0) {
-                        processor.editPart(selected(), i, id - 1);
+                        processor.editPart(selected(), i, id - 1, snapshot, currentDrumNote());
                         holdUntil = Time::getMillisecondCounterHiRes() + 300.0;
                     }
                 };
@@ -414,6 +516,7 @@ private:
         setControlHelp(component, info);
     }
     int selected() const { return jmax(0, part.getSelectedItemIndex()); }
+    int currentDrumNote() const { return selected() == 0 ? processor.selectedDrumNote() : localDrumNote; }
     static String partPrefix(int index) {
         return "Port " + String::charToString(juce_wchar('A' + index / partsPerPort))
             + ", Part " + String(index % partsPerPort + 1);
@@ -499,8 +602,24 @@ private:
         rebuildVariations();
         for (size_t i = 0; i < sliders.size(); ++i) {
             int value = 0;
-            const auto& p = *mu_pilot::definitions()[i];
-            if (!ui::read_value(p, selected(), snapshot, value) || !xg::valid(p, value)) continue;
+            const auto& p = mu_pilot::definitions()[i];
+            const auto& c = partControls[i];
+            if (mu_pilot::effectSlot(c)) {
+                const auto* effect = mu_pilot::effectBinding(c, snapshot).parameter;
+                if (effect != effectDetails[i] && !sliders[i].isEnteringValue()) {
+                    effectDetails[i] = effect;
+                    const String title = effect ? String::fromUTF8(effect->label) : String(c.label) + " (unused)";
+                    sliders[i].setName(title);
+                    sliders[i].setTitle(title);
+                    const auto rowIndex = size_t(std::find(controls.begin(), controls.end(), &sliders[i]) - controls.begin());
+                    labels[rowIndex]->setText(title, dontSendNotification);
+                    if (effect && effect->lo < effect->hi) sliders[i].setRange(effect->lo, effect->hi, 1);
+                }
+                sliders[i].setEnabled(effectDetails[i] && effectDetails[i]->lo < effectDetails[i]->hi);
+            }
+            if (c.target == mu_pilot::Target::drum)
+                sliders[i].setEnabled(mu_pilot::drumSetup(snapshot, selected()) >= 0);
+            if (!mu_pilot::readControl(c, selected(), currentDrumNote(), snapshot, value)) continue;
             if (auto* combo = effectChoices[i].get()) {
                 if (!combo->getNumItems()) {
                     const std::lock_guard guard(effectCatalogueLock);
@@ -588,6 +707,7 @@ private:
     StringArray pageNames;
     std::array<scbridge::NumericSlider, partControls.size()> sliders;
     std::array<std::unique_ptr<hs2port::KeyboardChoice>, partControls.size()> effectChoices;
+    std::array<const xg::fx_param*, partControls.size()> effectDetails{};
     TextButton panic{"All Notes Off"}, reset{"XG Reset"}, help{"Keyboard help"}, settings{"Audio and MIDI Settings"};
     hs2port::ReviewText status, review;
     std::vector<Component*> controls;
@@ -598,6 +718,7 @@ private:
     std::vector<std::pair<int, int>> variations;
     int variationKey = -1;
     int voiceModeKey = -1;
+    int localDrumNote = 36;
     uint64_t lastSerial = 0;
     double holdUntil = 0;
 };

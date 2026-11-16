@@ -6,6 +6,8 @@
 #include <vector>
 #if JUCE_MAC
 #include <CoreFoundation/CoreFoundation.h>
+#elif JUCE_WINDOWS
+#include <windows.h>
 #endif
 
 int main(int argc, char** argv) {
@@ -25,6 +27,107 @@ int main(int argc, char** argv) {
     AudioBuffer<float> audio(2, block);
     MidiBuffer midi;
     const auto render = [&] { audio.clear(); plugin->processBlock(audio, midi); midi.clear(); };
+#if JUCE_MAC || JUCE_WINDOWS
+    if (argc == 4 && String(argv[2]) == "--advanced") {
+        const auto pump = [&](int blocks = 90) {
+            for (int i = 0; i < blocks; ++i) {
+                render();
+                if (i % 8 != 0) continue;
+#if JUCE_MAC
+                CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.010, false);
+#else
+                Thread::sleep(10);
+                MSG message{};
+                for (int n = 0; n < 100 && PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE); ++n) {
+                    TranslateMessage(&message);
+                    DispatchMessageW(&message);
+                }
+#endif
+            }
+        };
+        const auto send = [&](std::initializer_list<uint8_t> data) {
+            midi.addEvent(MidiMessage::createSysExMessage(data.begin(), int(data.size())), 0);
+            pump();
+        };
+        const auto find = [&](String name) -> AudioProcessorParameter* {
+            for (auto* parameter : plugin->getParameters())
+                if (parameter->getName(100) == name) return parameter;
+            std::cerr << "Missing parameter " << name << '\n';
+            return nullptr;
+        };
+        const auto same = [&](AudioProcessorParameter& p, float expected) {
+            const float got = p.getValue();
+            std::cout << p.getName(100) << ": " << p.getCurrentValueAsText() << " (" << got << ")\n";
+            return std::abs(got - expected) < 0.0001f;
+        };
+        MemoryBlock kit;
+        auto* vst = plugin->getVST3Client();
+        const File input(argv[3]);
+        if (!vst || !input.loadFileAsData(kit)) return 50;
+        if (input.hasFileExtension(".nksf")) {
+            const auto* bytes = static_cast<const uint8_t*>(kit.getData());
+            for (size_t pos = 12; pos + 8 <= kit.getSize();) {
+                const auto size = ByteOrder::littleEndianInt(bytes + pos + 4);
+                if (size > kit.getSize() - pos - 8) return 50;
+                if (std::memcmp(bytes + pos, "PCHK", 4) == 0 && size > 4) {
+                    MemoryBlock native(bytes + pos + 12, size - 4);
+                    kit.swapWith(native);
+                    break;
+                }
+                pos += 8 + size + (size & 1);
+            }
+        }
+        if (!vst->setPreset(kit)) return 50;
+        pump(1400);
+        auto* mode = find("Routing Part Mode");
+        auto* note = find("Drum Mixer Note");
+        auto* level = find("Drum Mixer Level");
+        auto* depth = find("Variation FX A Parameter 2");
+        auto* route = find("Insertion 4 Target");
+        if (!mode || !note || !level || !depth || !route) return 51;
+        std::cout << "Cold kit mode: " << mode->getCurrentValueAsText() << '\n';
+        if (mode->getValue() < .4f) return 52;
+        const auto drumPeak = [&](int pitch) {
+            midi.addEvent(MidiMessage::noteOn(1, pitch, uint8_t(100)), 0);
+            float peak = 0;
+            for (int i = 0; i < 40; ++i) { render(); peak = jmax(peak, audio.getMagnitude(0, block)); }
+            midi.addEvent(MidiMessage::allSoundOff(1), 0);
+            pump(80);
+            return peak;
+        };
+        const auto kick = drumPeak(36), snare = drumPeak(38);
+        if (kick < .001f || snare < .001f) return 53;
+        level->setValueNotifyingHost(0.0f);
+        pump();
+        const auto quiet = drumPeak(36), snareAfter = drumPeak(38);
+        std::cout << "Kick peak: " << kick << " -> " << quiet << "; snare: " << snare << " -> " << snareAfter << '\n';
+        if (quiet > kick * .1f || std::abs(snareAfter - snare) > snare * .2f) return 54;
+        note->setValueNotifyingHost(float(38 - 13) / (91 - 13));
+        pump();
+        if (level->getValue() <= 0.1f) return 55;
+        send({0x43, 0x10, 0x4c, 0x02, 0x01, 0x40, 0x46, 0});
+        send({0x43, 0x10, 0x4c, 0x02, 0x01, 0x44, 0, 43});
+        if (!same(*depth, std::round(43.0f * 16383 / 127) / 16383)) return 56;
+        depth->setValueNotifyingHost(105.0f / 127);
+        pump();
+        if (!same(*depth, std::round(105.0f * 16383 / 127) / 16383)) return 57;
+        send({0x43, 0x10, 0x4c, 0x03, 0x03, 0x0c, 17});
+        if (!same(*route, 17.0f / 66)) return 58;
+        route->setValueNotifyingHost(1.0f);
+        pump();
+        if (!same(*route, 1.0f) || route->getCurrentValueAsText() != "Off") return 59;
+        MemoryBlock saved;
+        plugin->getStateInformation(saved);
+        if (saved.isEmpty() || !vst->setPreset(kit)) return 60;
+        pump();
+        plugin->setStateInformation(saved.getData(), int(saved.getSize()));
+        pump(280);
+        if (!same(*note, float(38 - 13) / (91 - 13)) || !same(*depth, std::round(105.0f * 16383 / 127) / 16383)
+            || !same(*route, 1.0f)) return 61;
+        plugin->releaseResources();
+        return 0;
+    }
+#endif
     if (argc == 5 && String(argv[2]) == "--recall") {
         auto* vst = plugin->getVST3Client();
         if (!vst) return 31;
